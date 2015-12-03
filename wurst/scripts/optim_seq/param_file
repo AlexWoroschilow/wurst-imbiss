@@ -1,0 +1,19 @@
+# This is a parameter file.
+
+names pgap_open, qgap_open mat_shift
+start 10,   10    3
+lower 0.0,  0.0  0.01
+upper 50,   49   200
+
+o_file,       splx_out
+max_iter,     20
+max_restart   3
+f_tol         0.1
+scatter       0.1
+
+
+# Now come fixed parameters
+fixed align_type    s_and_w
+fixed pgap_widen    1
+fixed qgap_widen    1
+fixed sec_pnlty    10

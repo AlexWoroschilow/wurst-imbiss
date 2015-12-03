@@ -1,0 +1,12 @@
+# 18 Dec 2001
+# this is the activation function used as part of the cost
+# function in the optimisation routines.
+xscl = 20
+x_switch = 0.8
+f(x) =  - 1.0 / ( 1.0 + exp ( xscl * ( x_switch - x))   )
+set xran[0:1]
+set arrow from x_switch,-20 to x_switch,20
+
+
+plot f(x)
+

@@ -1,0 +1,53 @@
+Wurst::AlDb
+-----------
+-----------
+
+This directory keeps track of the evolving wurst alignment
+database. There are two sides to this :
+
+Wurst::AlDb.pm  ( and Wurst::AlDb::*)
+ - Set of Class::DBI derived classes which interface to a database
+ whose structure is given as SQL'sed schema in AlDb.pm.
+
+Wurst::SeqStrCmp.pm
+ - the set of routines used to generate alignments.
+Importantly, SeqStrCmp.pm holds two different alignment
+implementations and routines to vary parameters and alignment
+protocols. The details of these get stored in the database so we know
+which alignment was done with what approach.
+
+Dependencies
+------------
+
+Currently, you'll need :
+Class::DBI
+mysql-whatever (and DBD::mysql)
+Compress:Zlib
+Wurst::Guts
+
+
+Scripts
+-------
+
+Generally, everything that starts with test_ is a testing
+script. These were used to develop the methods actually used.
+There is no makefile as such here. In principal, the modules will get
+installed along with Wurst.pm/libWurst.a etc, but that isn't linked in yet.
+
+aldb_* are scripts that do something useful. They are still not
+perfect.
+ - create AlType entries.
+ - modify AlType entries.
+ - queue pending alignments
+ - calculate alignments
+ - revert calculated alignments back to queued alignments.
+ - do a very large mpi job to calculate alignments. (unwieldly at the
+ - moment)
+   - you need Parallel::MPI::Simple(0.3b) for this
+   (Parallel::MPI::SimD).
+   That can be checked out here:
+   cvs -d/bm/cvs Parallel-MPI-Simple
+   .. it should build ok if you have a sane MPI installation.
+   .. one day it might make it to CPAN.
+
+

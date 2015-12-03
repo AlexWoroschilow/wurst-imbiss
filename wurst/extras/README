@@ -1,0 +1,122 @@
+wurst/extras/README
+
+Wurst extras are modules which are not necessary for doing structure
+prediction, but might be really helpful when we want to make nice
+models automatically or work with databases.
+
+On a final note, many of these modules are perhaps tainted, because
+they rely on the existence of other programs to actually do anything
+complex (like build a homology model or do some dynamics).
+
+Either use a standard directory structure like 'modulename'/modulename.pm
+and 'modulename'/Makefile.PL, which should get picked up by the
+magical makefile. Alternatively, you might need to modify the makefile
+with the name of your .pm file if it's a simple one-file package.
+
+Instructions for making a new XS/C module 
+-----------------------------------------
+1. Make a new directory with a sensible name
+
+2. Copy these files into this new directory :
+   Pack/Makefile Pack/src/Makefile
+
+3. Place your C (or other) source in the src directory. Make sure it 
+   has well formed (that is self-contained 'api-like') header files,
+   in the same sense as the 'sourcecode_i.h' files in wurst/src.
+
+4. Edit the src/Makefile so that it builds your module's object files
+   correctly. This should just involve putting the source files in
+   the SRCS list.
+
+5. Change the names in src/Makefile to reflect your module name.
+
+6. change to Yourmodule/src and run h2xs :
+   Use h2xs -x -n Yourmodulename -b 5.0.4 Yourmoduleinterface_header.h
+   This should make the Perl-Extension build tree under the src
+   directory.
+
+7. The Makefile.PL file needs to extract the Wurst build parameters
+   from the environment variables. All of this is done in
+   Pack/src/Wurst/Pack/Makefile.PL.
+The code for this is :
+=cut
+
+if (defined $ENV{CC}) {
+    $CC = $ENV{CC}; }
+
+if (defined $ENV{OPTIMIZE}) {
+    $OPTIMIZE = $ENV{OPTIMIZE}; }
+
+if (defined $ENV{MOD_OBJS}) {
+    $MOD_OBJS = {MOD_OBJS};
+    $MOD_OBJS =~ s/\s\S/ ..\/..\//g;
+}
+
+
+if (defined $ENV{MANDEST}) {
+    $man_dest = $ENV{MANDEST};
+} else {
+    $man_dest = "$ENV{HOME}/pl/lib"; }
+
+if ($CC eq 'gcc') {
+    $OPTIMIZE="$OPTIMIZE"; }
+
+=end
+   Notes - CC is not a defined parameter for MakeMaker (as of 5.8.0),
+   and $(MOD_OBJS) is used by Guts/src/Makefile to pass the numerous
+   object filenames to the perlstuff make.
+
+8. Setting the MakeMaker parameters. These should look something like
+   :
+=cut
+WriteMakefile(
+              'NAME'		=> 'Wurst::Guts',
+              'VERSION_FROM'	=> 'Guts.pm',
+              'PREREQ_PM'		=> {'Wurst'=>0.01},
+              ($] >= 5.005 ?    ## Add these new keywords supported since 5.005
+               (ABSTRACT_FROM => 'Guts.pm', # retrieve abstract from module
+                AUTHOR     => 'James Procter <procter@suse.de>') : ()),
+              'LIBS'		=> ['-lm'], 
+              'MYEXTLIB' => "$MOD_OBJS", 
+              'OPTIMIZE' => $OPTIMIZE,
+              'DEFINE'		=> '', 
+              'INC'		=> '-I. -I../../ -I../../../../../src/', 
+              XSPROTOARG => '-prototypes'              
+              );
+=end
+   Notes: MOD_OBJS also contains 'libwurst.a' in the above example,
+   which has corresponding header files in '../../../../../src'.
+   If you have no codependency to libwurst, then you don't need that
+   part of the 'INC' entry.
+
+   If you do, then you will need to make references to the wurst type
+   definitions that you use, in the Module.xs file, and link in the
+   library.
+
+   In Makefile.PL, insert this line after the $MOD_OBJS=~ regexp.
+
+=cut
+$MOD_OBJS = $MOD_OBJS." ../../../../../src/libwurst.a";
+=end
+
+   The number of '../''s should be appropriate for the
+   h2xs build-tree. The one given above finds the correct libwurst.a
+   for two level build trees (Wurst/Modname/Makefile.PL). I haven't,
+   as yet, worked out a foolproof way of keeping relative paths up to
+   date in cascading makefiles.
+
+9. Codependencies with Wurst.
+   With no codependencies, the XS file will probably compile as it
+   stands. However, if you have functions which take Wurst objects,
+   then you need the appropriate typemap entries from
+   wurst/src/Wurst/typemap incorporated into your module's own typemap
+   file.  You also need to put in some typedefs (perhaps this will be
+   a simple include file, eventually) that map the struct
+   <wurst_struct> C-types to their opaque-object names (as referred to
+   in the typemap).
+
+   
+
+
+     
+      

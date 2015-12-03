@@ -1,0 +1,65 @@
+Please type any problems you have into this file. We should look at
+the nice in Iryna and Nils Software-Projekt-Bericht.
+I would suggest that we keep this file brief, but if you want to write
+more, we could put more details in the documentation (pod) directory.
+
+(Oki, just a bit notes)
+
+* was haben wir Juergen versprochen ?
+Was fuer eine Klasse sollten wir bauen ?
+
+   - wir haben noch nichts versprochen. Baselleute muessen noch ueber 
+     das Interface spraechen. Da die (grosse basel-)Bibliothek in C++ ist, 
+     habe ich angeboten Interface als eine Klasse zu organisieren. Aber 
+     das war nur ein Angebot dass sie (in Basel) darueber nachdenken. 
+     Ab mitte Juni (2012) sagt Jurgen dann Bescheid, was und wie sie unser 
+     wurstl einbauen moechten. 
+     Bis dahin habe ich zeit um die Klassen-Strukturen in statische 
+     c-strukturen umzuschreiben
+
+* Parameterisierung von Patrick's Alignment-Funktion
+
+* Einbau von Patrick's funktion in unserem Server
+    
+   - es gibt so eine version unter 
+     flensburg.zbh.uni-hamburg.de/~ibondarenko/salami/
+     aber ich muss noch die conservierung anpassen.
+
+* einbau von Klassifizierung-Datei in C-code
+
+* kompiliere mit -g und valgrind server code
+  Ich fuerchte, dass sv_setpvn() nicht so freundlich ist.
+
+* Fuer den Fall, dass sv_setpvn() funktioniert, ohne Memory leaks,
+  entferne scratch-space code von ueberall in wurst
+
+* Warum sieht der Server auf Andrews Laptop so schrechlich aus ?
+
+  - bald wird alles wieder super
+
+* Welche Help-Seite der Web-seite brauchen Hilfe von Andrew ?
+  Nils und Iryna organisieren die Dateien. Andrew tippt seinen (und gerne Irina's) Teil
+  ein.
+
+* Organise the weekly updates.
+
+* Server Geschwindigkeit
+ * lohnt es sich zu profiliern (gprof oder intel Profiler ?)
+ * lohnt es sich Andrews parallelisierte I/O code einzubauen ?
+   Der Code funktioniert aber die Struktur ist sehr zerbrechlich.
+
+------------------------------
+Andrew
+* ist Patricks Code funtkionsfaehig im Wursts Hauptzweig eingebaut ?
+* hat Iryna ein Beispiel Alignment Code-Fragment fuer mich ?
+  - das habe ich nicht verstanden :(
+  
+  
+  
+Code reorganisation / code convention
+======================================
+align.c: put both functions get_pair_set_n , get_pair_set_m to pair_set.c
+         and rename to pair_set_get_n and pair_set_get_m while also 
+         considerung align.h and pair_set_i.h
+         
+         

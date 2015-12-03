@@ -1,0 +1,68 @@
+ node is 0.5-0.6.
+
+subset:
+                 SUB: a subset of the prediction, for all residues with
+                      an expected accuracy > 82% (see  tables in header)
+                note: for this subset the following symbols are used:
+                   L: is loop (for which above " " is used)
+                 ".": means that no prediction is made for this residue,
+                      as the reliability is Rel < 5
+
+
+
+
+
+     protein:       query          length      187
+
+
+              ....,....1....,....2....,....3....,....4....,....5....,....6
+         AA  |MLLDEGWLAEARRVPSPHYDCRPDDENPSLLVVHNISLPPGEFGGPWIDALFTGTIDPNA|
+         PHD |                            EEEEEEE            HHHHH        |
+         Rel |975237414653488999788999999659999861799976676402665212357798|
+ detail:
+         prH-|000000000111100000111000000000000000000022222245776544321101
+         prE-|012331242122210000000000000179999874100000000010000000000000
+         prL-|986568656765688988888989999720000115789877777643212345668788
+ subset: SUB |LLL..L...LL..LLLLLLLLLLLLLLLEEEEEEE.LLLLLLLLL...HHH....LLLLL|
+
+
+              ....,....7....,....8....,....9....,....10...,....11...,....1
+         AA  |HPYFAGIAHLRVSAHCLIRRDGEIVQYVPFDKRAWHAGVSSYQGRERCNDFSIGIELEGT|
+         PHD |          EEEEEEEEE   EEEEEE      E               EEEEEEEE  |
+         Rel |853333522113478998158659998366532203587566877768871478999717|
+ detail:
+         prH-|023322100000000000000000000001222112101222011110000000000000
+         prE-|000112133445678898421268998511123342100000000000014688999841
+         prL-|865554655443210001468720001377654445687677887878874211000157
+ subset: SUB |LL....L......EEEEE.LLLEEEEE.LLL.....LLLLLLLLLLLLLL..EEEEEE.L|
+
+
+              2...,....13...,....14...,....15...,....16...,....17...,....1
+         AA  |DTLAYTDAQYQQLAAVTNALITRYPAIANNMTGHCNIAPERKTDPGPSFDWARFRALVTP|
+         PHD |      HHHHHHHHHHHHHHHHH      EE                   HHHHHHHH  |
+         Rel |977541699999999999999970888652312555687897799976664999998458|
+ detail:
+         prH-|011234789999999999999984100111111111101111100012226899998621
+         prE-|000000000000000000000000000025543121000000000000000000000000
+         prL-|977765200000000000000014888763245666787888799977772100001368
+ subset: SUB |LLLL..HHHHHHHHHHHHHHHHH.LLLLL....LLLLLLLLLLLLLLLLL.HHHHHH.LL|
+
+
+              8...,....19...,....20...,....21...,....22...,....23...,....2
+         AA  |SSHKEMT|
+         PHD |       |
+         Rel |9976899
+ detail:
+         prH-|0011100
+         prE-|0000000
+         prL-|8887899
+ subset: SUB |LLLLLLL|
+
+
+
+
+
+
+
+END
+

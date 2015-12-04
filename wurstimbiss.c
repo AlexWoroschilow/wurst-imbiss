@@ -474,7 +474,9 @@ int main(int argc, char** argv) {
 		}
 
 		input = loadSequence(space, inputfile);
-		//seq = printSequence (space, input, 60); 
+		printf(">Seq: %s\n", input->sequence);
+
+		//seq = printSequence (space, input, 60);
 		printf(">IMBISS order delivered\n");
 		//printf("%s\n",seq);
 		printf("%s\n", input->url);

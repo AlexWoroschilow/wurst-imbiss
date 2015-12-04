@@ -333,10 +333,10 @@ int main(int argc, char** argv) {
 	zlog_category_t *logger;
 	assert(zlog_init("wurstimblog.conf") == CONFIG_OK);
 	logger = zlog_get_category("wurstimbiss");
-	zlog_info(logger, "Alphabet:\t%s", file_abc);
-	zlog_info(logger, "Sequences:\t%s", file_seq);
-	zlog_info(logger, "Structures:\t%s", file_batch);
-	zlog_info(logger, "Substitut.:\t%s", file_sub);
+	zlog_info(logger, "File abc:\t%s", file_abc);
+	zlog_info(logger, "File seq:\t%s", file_seq);
+	zlog_info(logger, "File str:\t%s", file_batch);
+	zlog_info(logger, "File sub:\t%s", file_sub);
 
 	while (1) {
 		c = getopt_long(argc, argv, "SAghFGBLM:D:r:m:x:n:p:b:s:a:q:l:c:dvw", long_options, &optindex);
@@ -467,13 +467,12 @@ int main(int argc, char** argv) {
 	time_t time_start, time_end;
 	double time_diff;
 
-	/*construct the suffix array*/
 	time(&time_start);
 	suffix_array = constructSufArr(space, sequences, noofseqs, NULL);
 	constructLcp(space, suffix_array);
 	time(&time_end);
 	time_diff = difftime(time_end, time_start);
-	zlog_debug(logger, "S.A. time:\t%f", time_diff);
+	zlog_debug(logger, "Time:\tsuffix array in %f sec", time_diff);
 
 	/*do search*/
 	for (i = 0; i < noofqueries; i++) {
@@ -497,7 +496,7 @@ int main(int argc, char** argv) {
 		matches = sufSubstring(space, suffix_array, input->sequence, input->length, substrlen);
 		time(&time_end);
 		time_diff = difftime(time_end, time_start);
-		zlog_debug(logger, "S.M. time:\t%f", time_diff);
+		zlog_debug(logger, "Time:\tsuffix array match in %f sec", time_diff);
 
 		/*get prob vector url for salami/wurst*/
 		//printf("%.*s\n", 5, input->url + 58);

@@ -21,6 +21,9 @@
 #include <ncurses.h>
 #include <memory.h>
 #include <stddef.h>
+#include <assert.h>
+#include <zlog.h>
+#include <configini.h>
 
 #include "lib/memory.h"
 #include "inc/wurstimbiss.h"
@@ -69,15 +72,16 @@ static int verbose_flag;
 static struct option long_options[] = {
 /* These options set a flag. */
 { "verbose", no_argument, &verbose_flag, 1 }, { "brief", no_argument, &verbose_flag, 0 }, { "sequences",
-		required_argument, 0, 's' }, { "query", required_argument, 0, 'q' }, { "matchlen", required_argument, 0, 'l' },
-		{ "minmatches", required_argument, 0, 'c' }, { "depictsw", no_argument, 0, 'd' }, { "veggie", no_argument, 0,
-				'w' }, { "batchfile", required_argument, 0, 'b' }, { "percent", required_argument, 0, 'p' }, {
-				"subfile", required_argument, 0, 'x' }, { "reportfile", required_argument, 0, 'r' }, { "allscores",
+required_argument, 0, 's' }, { "query", required_argument, 0, 'q' }, { "matchlen", required_argument, 0, 'l' }, {
+		"minmatches", required_argument, 0, 'c' }, { "depictsw", no_argument, 0, 'd' },
+		{ "veggie", no_argument, 0, 'w' }, { "batchfile", required_argument, 0, 'b' }, { "percent", required_argument,
+				0, 'p' }, { "subfile", required_argument, 0, 'x' }, { "reportfile", required_argument, 0, 'r' }, {
+				"allscores",
 				no_argument, 0, 'S' }, { "segmentscore", no_argument, 0, 'B' }, { "allalign", no_argument, 0, 'A' }, {
 				"scorefilter", no_argument, 0, 'F' }, { "segfilter", no_argument, 0, 'G' }, { "match",
-				required_argument, 0, 'M' }, { "mismatch", required_argument, 0, 'D' },
-		{ "latex", no_argument, 0, 'L' }, { "maxmatches", required_argument, 0, 'm' }, { "help", no_argument, 0, 'h' },
-		{ "gnuplot", no_argument, 0, 'g' }, { 0, 0, 0, 0 } };
+		required_argument, 0, 'M' }, { "mismatch", required_argument, 0, 'D' }, { "latex", no_argument, 0, 'L' }, {
+				"maxmatches", required_argument, 0, 'm' }, { "help", no_argument, 0, 'h' }, { "gnuplot", no_argument, 0,
+				'g' }, { 0, 0, 0, 0 } };
 
 /*------------------------------- getProbChar --------------------------------
  *    
@@ -300,7 +304,7 @@ int main(int argc, char** argv) {
 	Matchtype* (*select)(void *, Matchtype *, Uint k, IntSequence *, IntSequence **, void *) = selectSW;
 
 	stringset_t **fn, **freq, *queryurl, **queries = NULL;
-	Suffixarray *arr = NULL;
+	Suffixarray *suffix_array = NULL;
 	IntSequence **sequences = NULL;
 	IntSequence *input = NULL;
 	FAlphabet *alphabet = NULL;
@@ -310,11 +314,29 @@ int main(int argc, char** argv) {
 	time_t startsuf, endsuf;
 	double difsuf, difmatch, difrank;
 
-#ifdef MEMMAN_H 	
+#ifdef MEMMAN_H
 	Spacetable spacetab;
 	initmemoryblocks(&spacetab, 100000);
 	space = &spacetab;
 #endif
+
+	Config *cfg = NULL;
+	char file_batch[1024], file_sub[1024], file_abc[1024], file_seq[1024];
+	assert(ConfigReadFile("wurstimbiss.conf", &cfg) == CONFIG_OK);
+	ConfigReadString(cfg, "sources", "file_batch", file_batch, sizeof(file_batch), 0);
+	ConfigReadString(cfg, "sources", "file_sub", file_sub, sizeof(file_sub), 0);
+	ConfigReadString(cfg, "sources", "file_abc", file_abc, sizeof(file_abc), 0);
+	ConfigReadString(cfg, "sources", "file_seq", file_seq, sizeof(file_seq), 0);
+
+	ConfigFree(cfg);
+
+	zlog_category_t *logger;
+	assert(zlog_init("wurstimblog.conf") == CONFIG_OK);
+	logger = zlog_get_category("wurstimbiss");
+	zlog_info(logger, "Alphabet:\t%s", file_abc);
+	zlog_info(logger, "Sequences:\t%s", file_seq);
+	zlog_info(logger, "Structures:\t%s", file_batch);
+	zlog_info(logger, "Substitut.:\t%s", file_sub);
 
 	while (1) {
 		c = getopt_long(argc, argv, "SAghFGBLM:D:r:m:x:n:p:b:s:a:q:l:c:dvw", long_options, &optindex);
@@ -334,9 +356,6 @@ int main(int argc, char** argv) {
 		case 's':
 			pveclistfile = optarg;
 			break;
-		case 'a':
-			alphabetfile = optarg;
-			break;
 		case 'q':
 			inputfile = optarg;
 			noofqueries = 1;
@@ -346,9 +365,6 @@ int main(int argc, char** argv) {
 			break;
 		case 'c':
 			minseeds = atoi(optarg);
-			break;
-		case 'b':
-			batchfile = optarg;
 			break;
 		case 'p':
 			percent = atoi(optarg);
@@ -403,10 +419,6 @@ int main(int argc, char** argv) {
 			exit(EXIT_FAILURE);
 		}
 	}
-	if (pveclistfile == NULL || (inputfile == NULL && batchfile == NULL) || alphabetfile == NULL) {
-		usage(argv[0]);
-		exit(EXIT_FAILURE);
-	}
 
 	imbiss = ALLOCMEMORY(space, NULL, imbissinfo, 1);
 	imbiss->reportfile = reportfile;
@@ -415,10 +427,7 @@ int main(int argc, char** argv) {
 	imbiss->minseeds = minseeds;
 	imbiss->wurst = wurst;
 
-	/*read batch file*/
-	if (batchfile) {
-		queries = readcsv(space, batchfile, "", &noofqueries);
-	}
+	queries = readcsv(space, file_batch, "", &noofqueries);
 
 	/*read substitution matrix*/
 	if (subfile) {
@@ -436,16 +445,17 @@ int main(int argc, char** argv) {
 	}
 
 	/*read alphabet*/
-	if (alphabetfile != NULL) {
-		alphabet = loadCSValphabet(space, alphabetfile);
-		sortMapdomain(space, alphabet);
-	}
+	alphabet = loadCSValphabet(space, file_abc);
+	zlog_debug(logger, "Load:\t%s", file_abc);
+	sortMapdomain(space, alphabet);
 
 	/*load sequence database*/
-	fn = readcsv(space, pveclistfile, "", &noofseqs);
+	fn = readcsv(space, file_seq, "", &noofseqs);
 	sequences = ALLOCMEMORY(space, NULL, IntSequence *, noofseqs);
 	for (i = 0; i < noofseqs; i++) {
-		sequences[i] = loadSequence(space, SETSTR(fn[i], 0));
+		const char * file = (const char *) SETSTR(fn[i], 0);
+		sequences[i] = loadSequence(space, file);
+		zlog_debug(logger, "Load:\t%s", file);
 	}
 
 	for (i = 0; i < noofseqs; i++) {
@@ -453,20 +463,23 @@ int main(int argc, char** argv) {
 	}
 	FREEMEMORY(space, fn);
 
+
+	time_t time_start, time_end;
+	double time_diff;
+
 	/*construct the suffix array*/
-	time(&startsuf);
-	arr = constructSufArr(space, sequences, noofseqs, NULL);
-	constructLcp(space, arr);
-	time(&endsuf);
-	difsuf = difftime(endsuf, startsuf);
+	time(&time_start);
+	suffix_array = constructSufArr(space, sequences, noofseqs, NULL);
+	constructLcp(space, suffix_array);
+	time(&time_end);
+	time_diff = difftime(time_end, time_start);
+	zlog_debug(logger, "S.A. time:\t%f", time_diff);
 
 	/*do search*/
 	for (i = 0; i < noofqueries; i++) {
 
 		/*get query form batchfile*/
-		if (queries) {
-			inputfile = SETSTR(queries[i], 0);
-		}
+		inputfile = SETSTR(queries[i], 0);
 
 		/*typically only used with batchfile*/
 		if (percent != 0) {
@@ -474,18 +487,17 @@ int main(int argc, char** argv) {
 		}
 
 		input = loadSequence(space, inputfile);
-		printf(">Seq: %s\n", input->sequence);
-
 		//seq = printSequence (space, input, 60);
-		printf(">IMBISS order delivered\n");
+		//printf(">IMBISS order delivered\n");
 		//printf("%s\n",seq);
-		printf("%s\n", input->url);
-		//FREEMEMORY(space, seq);	
+		//FREEMEMORY(space, seq);
+		//continue;
 
-		time(&startsuf);
-		matches = sufSubstring(space, arr, input->sequence, input->length, substrlen);
-		time(&endsuf);
-		difmatch = difftime(endsuf, startsuf);
+		time(&time_start);
+		matches = sufSubstring(space, suffix_array, input->sequence, input->length, substrlen);
+		time(&time_end);
+		time_diff = difftime(time_end, time_start);
+		zlog_debug(logger, "S.M. time:\t%f", time_diff);
 
 		/*get prob vector url for salami/wurst*/
 		//printf("%.*s\n", 5, input->url + 58);
@@ -515,8 +527,8 @@ int main(int argc, char** argv) {
 		imbiss->consensus = ALLOCMEMORY(space, NULL, Uint, (input->length - substrlen));
 		memset(imbiss->consensus, 0, (sizeof(Uint) * (input->length - substrlen)));
 
-		rankSufmatch(space, arr, matches, input->length - substrlen, maxmatches, substrlen, sequences, noofseqs, filter,
-				select, handler, input, imbiss, scores, depictsw);
+		rankSufmatch(space, suffix_array, matches, input->length - substrlen, maxmatches, substrlen, sequences,
+				noofseqs, filter, select, handler, input, imbiss, scores, depictsw);
 
 		if (gnuplot) {
 			consensus(space, imbiss->consensus, input->length - substrlen, input, substrlen, imbiss);
@@ -548,7 +560,8 @@ int main(int argc, char** argv) {
 		destructSequence(space, sequences[i]);
 	}
 	FREEMEMORY(space, sequences);
-	destructSufArr(space, arr);
+	destructSufArr(space, suffix_array);
+	zlog_fini();
 
 #ifdef MEMMAN_H
 	activeblocks(space);

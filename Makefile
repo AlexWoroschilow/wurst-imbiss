@@ -1,7 +1,7 @@
 CC=gcc
 LD=${CC} 
-CFLAGS= -O3 -DDONT_SEE_RCS -Wall -pedantic -I./inc/ -I ./gnuplot/src/ -I./lib/ -I./wurst/src/wurstsrc/ -L./wurst/src/wurstsrc/ -L./inc/ -L./lib/  
-LDFLAGS= -lm -lwurst -lc -lpthread
+CFLAGS= -O3 -DDONT_SEE_RCS -Wall -pedantic -I./inc/ -I./vendor/cini/include/ -I./vendor/zlog/include/  -I./vendor/gnuplot/src/ -I./lib/ -I./vendor/wurst/src/wurstsrc/ -L./vendor/zlog/lib/ -L./vendor/cini/lib/ -L./vendor/wurst/src/wurstsrc/ -L./inc/ -L./lib/  
+LDFLAGS= -lm -lwurst -lc -lpthread  -lzlog -lconfigini
 CTAGS=ctags > tags
 LIBS=-lob
 
@@ -95,7 +95,7 @@ BMPROBSEQOBJ   = ./lib/memman.o\
 	bmprobseq.o
 
 
-SUFPROBSEQOBJ   = ./gnuplot/gnuplot_i.o\
+SUFPROBSEQOBJ   = ./vendor/gnuplot/gnuplot_i.o\
 	./lib/memman.o\
 	./lib/list.o\
 	./inc/prob_vec.o\
@@ -136,7 +136,7 @@ ALPHABETTESTOBJ = alphabettest.o\
 	./inc/createalphabet.o\
 	./inc/falphabet.o\
 
-WURSTIMBISSOBJ   = ./gnuplot/gnuplot_i.o\
+WURSTIMBISSOBJ   = ./vendor/gnuplot/gnuplot_i.o\
 	./lib/memman.o\
 	./lib/list.o\
 	./lib/vtprogressbar.o\

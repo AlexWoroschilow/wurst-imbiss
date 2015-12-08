@@ -314,12 +314,6 @@ int main(int argc, char** argv) {
 	time_t startsuf, endsuf;
 	double difsuf, difmatch, difrank;
 
-#ifdef MEMMAN_H
-	Spacetable spacetab;
-	initmemoryblocks(&spacetab, 100000);
-	space = &spacetab;
-#endif
-
 	Config *cfg = NULL;
 	char file_batch[1024], file_sub[1024], file_abc[1024], file_seq[1024];
 	assert(ConfigReadFile("wurstimbiss.conf", &cfg) == CONFIG_OK);
@@ -429,50 +423,22 @@ int main(int argc, char** argv) {
 
 	queries = readcsv(space, file_batch, "", &noofqueries);
 
-	/*read substitution matrix*/
-	if (subfile) {
-		freq = readcsv(space, subfile, ",", &nooffreqs);
-		scores = ALLOCMEMORY(space, NULL, double, ((nooffreqs - 1) * (nooffreqs - 1)));
-		for (i = 1; i < nooffreqs; i++) {
-			for (j = 1; j < nooffreqs; j++) {
-				if (strcmp(SETSTR(freq[i], j), "inf") == 0) {
-					MATRIX2D(scores, nooffreqs-1, i, j)=0;
-				} else {
-					MATRIX2D(scores, nooffreqs-1, i, j)=atof(SETSTR(freq[i],j));
-				}
-			}
-		}
-	}
-
 	/*read alphabet*/
-	alphabet = loadCSValphabet(space, file_abc);
 	zlog_debug(logger, "Load:\t%s", file_abc);
-	sortMapdomain(space, alphabet);
+	alphabet = alphabet_load_csv(space, file_abc);
 
 	/*load sequence database*/
-	fn = readcsv(space, file_seq, "", &noofseqs);
-	sequences = ALLOCMEMORY(space, NULL, IntSequence *, noofseqs);
-	for (i = 0; i < noofseqs; i++) {
-		const char * file = (const char *) SETSTR(fn[i], 0);
-		sequences[i] = loadSequence(space, file);
-		zlog_debug(logger, "Load:\t%s", file);
-	}
-
-	for (i = 0; i < noofseqs; i++) {
-		destructStringset(space, fn[i]);
-	}
-	FREEMEMORY(space, fn);
-
+	zlog_debug(logger, "Load:\t%s", file_seq);
+	sequences = sequence_load_csv(space, file_seq, "", &noofseqs);
 
 	time_t time_start, time_end;
 	double time_diff;
 
 	time(&time_start);
-	suffix_array = constructSufArr(space, sequences, noofseqs, NULL);
-	constructLcp(space, suffix_array);
+	suffix_array = suffix_array_init(space, sequences, noofseqs, NULL);
 	time(&time_end);
 	time_diff = difftime(time_end, time_start);
-	zlog_debug(logger, "Time:\tsuffix array in %f sec", time_diff);
+	zlog_debug(logger, "Time:\t suffix array in %f sec", time_diff);
 
 	/*do search*/
 	for (i = 0; i < noofqueries; i++) {
@@ -480,12 +446,7 @@ int main(int argc, char** argv) {
 		/*get query form batchfile*/
 		inputfile = SETSTR(queries[i], 0);
 
-		/*typically only used with batchfile*/
-		if (percent != 0) {
-			substrlen = ((double) ((double) input->length / 100) * (double) percent);
-		}
-
-		input = loadSequence(space, inputfile);
+		input = sequence_load_file(space, inputfile);
 		//seq = printSequence (space, input, 60);
 		//printf(">IMBISS order delivered\n");
 		//printf("%s\n",seq);
@@ -496,7 +457,7 @@ int main(int argc, char** argv) {
 		matches = sufSubstring(space, suffix_array, input->sequence, input->length, substrlen);
 		time(&time_end);
 		time_diff = difftime(time_end, time_start);
-		zlog_debug(logger, "Time:\tsuffix array match in %f sec", time_diff);
+		zlog_debug(logger, "Time:\t suffix array match in %f sec", time_diff);
 
 		/*get prob vector url for salami/wurst*/
 		//printf("%.*s\n", 5, input->url + 58);
@@ -515,23 +476,14 @@ int main(int argc, char** argv) {
 		imbiss->substrlen = substrlen;
 		imbiss->alphabet = alphabet;
 
-		/*if a substition file was given ...*/
-		if (subfile) {
-			imbiss->sub = createsubmatrix(scores, imbiss->score, nooffreqs - 1);
-		}
-
 		/*match 'n' report*/
 		time(&startsuf);
 
 		imbiss->consensus = ALLOCMEMORY(space, NULL, Uint, (input->length - substrlen));
 		memset(imbiss->consensus, 0, (sizeof(Uint) * (input->length - substrlen)));
 
-		rankSufmatch(space, suffix_array, matches, input->length - substrlen, maxmatches, substrlen, sequences,
+		rankSufmatch(space, suffix_array, matches, (input->length - substrlen), maxmatches, substrlen, sequences,
 				noofseqs, filter, select, handler, input, imbiss, scores, depictsw);
-
-		if (gnuplot) {
-			consensus(space, imbiss->consensus, input->length - substrlen, input, substrlen, imbiss);
-		}
 
 		time(&endsuf);
 		difrank = difftime(endsuf, startsuf);
@@ -543,9 +495,6 @@ int main(int argc, char** argv) {
 		/*partial cleanup*/
 		//destructStringset(space, queryurl);
 		destructSequence(space, input);
-		if (subfile) {
-			FREEMEMORY(space, imbiss->sub);
-		}
 
 		FREEMEMORY(space, imbiss->consensus);
 		FREEMEMORY(space, imbiss->score);
@@ -559,12 +508,8 @@ int main(int argc, char** argv) {
 		destructSequence(space, sequences[i]);
 	}
 	FREEMEMORY(space, sequences);
-	destructSufArr(space, suffix_array);
+	suffix_array_destruct(space, suffix_array);
 	zlog_fini();
-
-#ifdef MEMMAN_H
-	activeblocks(space);
-#endif
 
 	printf("Goodbye.\n");
 	return EXIT_SUCCESS;

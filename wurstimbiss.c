@@ -399,6 +399,8 @@ int main(int argc, char** argv) {
 	imbiss->minseeds = minseeds;
 	imbiss->wurst = wurst;
 
+	time_t time_start, time_end;
+
 	queries = readcsv(space, file_batch, "", &noofqueries);
 
 	/*read alphabet*/
@@ -407,14 +409,18 @@ int main(int argc, char** argv) {
 
 	Uint sequence_count = 0;
 	zlog_debug(logger, "Load:\t%s", file_seq);
-	/*load sequence database*/
-	IntSequence **sequences_wurst = sequence_load_csv(space, file_seq, "", &sequence_count, sequence_load_wurst);
 
-	time_t time_start, time_end;
+	/*load sequence database*/
+	time(&time_start);
+	IntSequence **sequences_wurst = sequence_load_csv(space, file_seq, "", &sequence_count, sequence_load_wurst);
+	time(&time_end);
+
+	zlog_debug(logger, "Time:\t loaded in %f sec", difftime(time_end, time_start));
 
 	time(&time_start);
 	suffix_array = suffix_array_init(space, sequences_wurst, sequence_count, NULL);
 	time(&time_end);
+
 	zlog_debug(logger, "Time:\t suffix array in %f sec", difftime(time_end, time_start));
 
 	/*do search*/

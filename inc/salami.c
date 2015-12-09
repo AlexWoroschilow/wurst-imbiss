@@ -219,7 +219,7 @@ void salami_sequence_dump(struct salami_sequence * sequence) {
 	unsigned long i;
 	printf("Sequence length: %l \n", sequence->length);
 	for (i = 0; i < sequence->length; i++) {
-		printf("%c", sequence->sequence[i]);
+		printf("%d-", sequence->sequence[i]);
 	}
 	printf("\n");
 }

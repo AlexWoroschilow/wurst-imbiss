@@ -282,7 +282,12 @@ IntSequence* sequence_init(void *space) {
 	return initSequence(space);
 }
 
-Uint * salami_sequence_to_uint(struct salami_sequence * sequence) {
+/**
+ * Convert salami sequence string to
+ * Uint sequence string, needs for correct work
+ * with suffix array and so on
+ */
+Uint * salami_sequence_to_uint_sequence(struct salami_sequence * sequence) {
 	unsigned long i;
 	Uint * sequence_uint = ALLOCMEMORY(space, NULL, Uint, sequence->length);
 	for (i = 0; i < sequence->length; i++) {
@@ -320,14 +325,11 @@ IntSequence* sequence_load_pdb(void *space, char *filename) {
 
 	struct salami_sequence * sequence_salami = salami_sequence_string(sequence);
 	massert((sequence_salami != NULL), "Salami sequence can not be null");
-	salami_sequence_dump(sequence_salami);
 
-	sequence->sequence = salami_sequence_to_uint(sequence_salami);
+	sequence->sequence = salami_sequence_to_uint_sequence(sequence_salami);
 	sequence->info = info;
 
 	massert((fclose(infile) != EOF), "couldn't close file");
-
-	sequence_dump(sequence);
 
 	return sequence;
 }

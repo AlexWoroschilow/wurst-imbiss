@@ -9,7 +9,6 @@
 #include "salami.h"
 #include "massert.h"
 
-
 /* ----------------------------- printSequence -------------------------------
  *    
  * prints a beautiful IntSequence to a buffer 
@@ -310,8 +309,8 @@ IntSequence* sequence_load_pdb(void *space, char *filename) {
 	Uint *info = ALLOCMEMORY(space, NULL, Uint, sequence->length);
 	fread(info, sizeof(Uint), sequence->length, infile);
 
-	char * sequence_chain_pdb = salami_sequence_string(sequence);
-	printf("%s", sequence_chain_pdb);
+	struct salami_sequence * sequence_salami = salami_sequence_string(sequence);
+	printf("Salami sequence length: %d\n", sequence_salami->length);
 
 	sequence->sequence = sequence_chain;
 	sequence->info = info;

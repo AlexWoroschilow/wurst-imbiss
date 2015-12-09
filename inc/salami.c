@@ -45,7 +45,6 @@
 struct score_struct {
 	float scr_tot;
 	float cvr;
-
 };
 
 const float gapopen = 3.25;
@@ -191,7 +190,7 @@ get_scores(void *space, struct pair_set *set, struct coord *a, struct coord *b, 
 /**
  * TODO: destroy coordinates and sequence
  */
-char * salami_sequence_string(IntSequence *sequence) {
+struct salami_sequence * salami_sequence_string(IntSequence *sequence) {
 	char *path_binary = malloc(1024);
 	sprintf(path_binary, "/smallfiles/public/no_backup/bm/pdb_all_bin/%5s.bin\0", sequence->url + 56);
 
@@ -201,13 +200,19 @@ char * salami_sequence_string(IntSequence *sequence) {
 	struct seq *sequence_wurst = coord_get_seq(coordinates);
 	massert((sequence_wurst != NULL), "Coordinates object can not be null");
 
-	const char * sequence_wurst_chain = malloc(sizeof(const char) * sequence_wurst->length);
-	strcpy(sequence_wurst_chain, sequence_wurst->seq);
+	struct salami_sequence * response = malloc(sizeof(struct salami_sequence));
+	massert((response != NULL), "Salami sequence object can not be null");
+
+	response->length = sequence_wurst->length;
+	response->sequence = malloc(sizeof(char) * response->length);
+	massert((response->sequence != NULL), "Salami sequence can not be null");
+
+	strcpy(response->sequence, sequence_wurst->seq);
 
 	coord_destroy(coordinates);
 	seq_destroy(sequence_wurst);
 
-	return sequence_wurst_chain;
+	return response;
 }
 
 /*----------------------------- doWurstAlignment -----------------------------

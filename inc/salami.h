@@ -15,6 +15,11 @@
 #include "intsequence.h"
 #include "sufmatch.h"
 
+struct salami_sequence {
+	char * sequence;
+	unsigned int length;
+};
+
 struct salami_info {
 	float rmsd, andrew_scr, frac_dme, z_scr, id, sw_cvr, sw_smpl_score, sw_score, sw_score_tot, nw_cvr, nw_smpl_score,
 			nw_score, nw_score_tot;
@@ -33,6 +38,6 @@ struct score_struct* get_scores(void *space, struct pair_set *set, struct coord 
 struct salami_info*
 doWurstAlignment(void *space, Matchtype *m, IntSequence **s, int len, void *info);
 
-char * salami_sequence_string(IntSequence *sequence);
+struct salami_sequence * salami_sequence_string(IntSequence *sequence);
 
 #endif

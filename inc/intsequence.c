@@ -317,15 +317,13 @@ IntSequence* sequence_load_pdb(void *space, char *filename) {
 	fread(sequence->alphabetname, sizeof(char), sequence->namelen + 1, infile);
 	fread(sequence->url, sizeof(char), sequence->urllen + 1, infile);
 
-	Uint *sequence_chain = ALLOCMEMORY(space, NULL, Uint, sequence->length);
-	fread(sequence_chain, sizeof(Uint), sequence->length, infile);
-
 	Uint *info = ALLOCMEMORY(space, NULL, Uint, sequence->length);
 	fread(info, sizeof(Uint), sequence->length, infile);
 
 	struct salami_sequence * sequence_salami = salami_sequence_string(sequence);
 	massert((sequence_salami != NULL), "Salami sequence can not be null");
 
+	sequence->length = sequence_salami->length;
 	sequence->sequence = salami_sequence_to_uint_sequence(sequence_salami);
 	sequence->info = info;
 

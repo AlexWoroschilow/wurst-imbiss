@@ -215,6 +215,15 @@ struct salami_sequence * salami_sequence_string(IntSequence *sequence) {
 	return response;
 }
 
+void salami_sequence_dump(struct salami_sequence * sequence) {
+	unsigned long i;
+	printf("Sequence length: %l \n", sequence->length);
+	for (i = 0; i < sequence->length; i++) {
+		printf("%c", sequence->sequence[i]);
+	}
+	printf("\n");
+}
+
 /*----------------------------- doWurstAlignment -----------------------------
  *
  * invokes the Wurst library to calculate alignments and results

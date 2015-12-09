@@ -39,5 +39,6 @@ struct salami_info*
 doWurstAlignment(void *space, Matchtype *m, IntSequence **s, int len, void *info);
 
 struct salami_sequence * salami_sequence_string(IntSequence *sequence);
+void salami_sequence_dump(struct salami_sequence * sequence);
 
 #endif

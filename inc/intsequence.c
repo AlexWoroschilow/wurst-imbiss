@@ -310,7 +310,8 @@ IntSequence* sequence_load_pdb(void *space, char *filename) {
 	fread(info, sizeof(Uint), sequence->length, infile);
 
 	struct salami_sequence * sequence_salami = salami_sequence_string(sequence);
-	printf("Salami sequence length: %d\n", sequence_salami->length);
+	massert((sequence_salami != NULL), "Salami sequence can not be null");
+	salami_sequence_dump(sequence_salami);
 
 	sequence->sequence = sequence_chain;
 	sequence->info = info;

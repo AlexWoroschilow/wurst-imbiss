@@ -250,7 +250,7 @@ doWurstAlignment (void *space, Matchtype *m, IntSequence **s, int len,
 	
 	seq_a = coord_get_seq(coord_a);
 	seq_b = coord_get_seq(coord_b);
-	
+
 	//FREEMEMORY(space, p_a);
 	
 	/* read prob vectors and generate score matrix */

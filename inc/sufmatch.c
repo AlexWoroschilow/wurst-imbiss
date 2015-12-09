@@ -289,8 +289,7 @@ double getEntropy(void *space, Uint* sequence, Uint l, double* prob) {
  FREEMEMORY(space, align);
  }*/
 
-Matchtype*
-selectBlastScoreSWconst(void *space, Matchtype *m, Uint k, IntSequence *a, IntSequence **s, void *info) {
+Matchtype* selectBlastScoreSWconst(void *space, Matchtype *m, Uint k, IntSequence *a, IntSequence **s, void *info) {
 
 	Uint l, i;
 	int *swres;
@@ -322,8 +321,7 @@ selectBlastScoreSWconst(void *space, Matchtype *m, Uint k, IntSequence *a, IntSe
 	return m;
 }
 
-Matchtype*
-selectScoreSWconst(void *space, Matchtype *m, Uint k, IntSequence *a, IntSequence **s, void *info) {
+Matchtype* selectScoreSWconst(void *space, Matchtype *m, Uint k, IntSequence *a, IntSequence **s, void *info) {
 
 	Uint l, i;
 	int *swres;
@@ -355,22 +353,17 @@ selectScoreSWconst(void *space, Matchtype *m, Uint k, IntSequence *a, IntSequenc
 	return m;
 }
 
-Matchtype*
-selectSW(void *space, Matchtype *m, Uint k, IntSequence *a, IntSequence **s, void *info) {
+Matchtype* selectSW(void *space, Matchtype *m, Uint k, IntSequence *a, IntSequence **s, void *info) {
 	qsort(m, k, sizeof(Matchtype), cmp_swscore);
 	return m;
 }
 
-Matchtype*
-selectBlastScore(void *space, Matchtype *m, Uint k, IntSequence *a, IntSequence **s, void* info) {
-
+Matchtype* selectBlastScore(void *space, Matchtype *m, Uint k, IntSequence *a, IntSequence **s, void* info) {
 	qsort(m, k, sizeof(Matchtype), cmp_blast);
 	return m;
 }
 
-Matchtype*
-selectScore(void *space, Matchtype *m, Uint k, IntSequence *a, IntSequence **s, void* info) {
-
+Matchtype* selectScore(void *space, Matchtype *m, Uint k, IntSequence *a, IntSequence **s, void* info) {
 	qsort(m, k, sizeof(Matchtype), cmp_score);
 	return m;
 }
@@ -453,70 +446,81 @@ void initMatchtype(Matchtype *m, Uint id) {
  * 
  */
 
-void rankSufmatch(void *space, Suffixarray *a, PairSint *matches, Uint len, Uint maxmatches, Uint S, IntSequence **s,
-		Uint noofseqs, double (*fltr)(void *, Matchtype *, IntSequence *, IntSequence *, Uint *, Uint, Uint, void *),
-		Matchtype* (*sel)(void *, Matchtype *, Uint, IntSequence *, IntSequence **, void *),
-		int (*handler)(void *, Matchtype *, IntSequence **, Uint, Uint, void *), IntSequence *queryseq, void *info,
-		double *scores, unsigned char depictsw)
+void rankSufmatch(void *space, Suffixarray *suffix_array, PairSint *matches, Uint len, Uint maxmatches, Uint substrlen,
+		IntSequence **sequences, Uint noofseqs,
+		double (*filter)(void *, Matchtype *, IntSequence *, IntSequence *, Uint *, Uint, Uint, void *), // filter callback
+		Matchtype* (*selector)(void *, Matchtype *, Uint, IntSequence *, IntSequence **, void *), // selector callback
+		int (*handler)(void *, Matchtype *, IntSequence **, Uint, Uint, void *), // handler callback
+		IntSequence *sequence_a, void *info, double *scores, unsigned char depictsw)
 
 {
 
-	Matchtype key, *cur, *occ = NULL;
-	int i = 0, j = 0, k = 0, l = 0, r = 0, retval = 0;
-	int *hashTable;
+	Matchtype *match, *selected = NULL;
+	int i = 0, j = 0, k = 0;
+	int *hash_table;
 	double t;
 	Uint *ptr;
 
-	hashTable = ALLOCMEMORY(space, NULL, int, (noofseqs + 1));
-	memset(hashTable, -1, sizeof(int) * (noofseqs + 1));
+	hash_table = ALLOCMEMORY(space, NULL, int, (noofseqs + 1));
+	memset(hash_table, -1, sizeof(int) * (noofseqs + 1));
 
 	for (i = 0; i < len; i++) {
-		if (matches[i].b >= ((matches[i].a))) {
 
-			for (j = matches[i].a; j <= matches[i].b; j++) {
-				key.id = getMultiSeqIndex(a->seq, a->suffixptr[a->suftab[j]]);
-				r = hashTable[key.id];
+		const PairSint * pair = &matches[i];
+		if (pair->b < pair->a) {
+			continue;
+		}
 
-				if (r == -1) {
-					occ = ALLOCMEMORY(space, occ, Matchtype, k + 1);
-					hashTable[key.id] = (&occ[k]) - (occ);
-					initMatchtype(&occ[k], key.id);
-					cur = &occ[k];
-					k++;
-				} else {
-					cur = ((Matchtype*) (occ + r));
-				}
+		for (j = pair->a; j <= pair->b; j++) {
+			const Uint index = getMultiSeqIndex(suffix_array->seq, suffix_array->suffixptr[suffix_array->suftab[j]]);
+			const int r = hash_table[index];
 
-				/*score the matches if no < maxmatches*/
-				if ((matches[i].b - matches[i].a) < maxmatches) {
-					ptr = (a->suffixptr[a->suftab[j]]);
-					t = fltr(space, cur, queryseq, s[cur->id], ptr, S, i, info);
-
-					if (t == -1)
-						break;
-				}
+			if (r == -1) {
+				selected = ALLOCMEMORY(space, selected, Matchtype, k + 1);
+				hash_table[index] = (&selected[k]) - (selected);
+				initMatchtype(&selected[k], index);
+				match = &selected[k];
+				k++;
+			} else {
+				match = ((Matchtype*) (selected + r));
 			}
+
+			/*score the matches if no < maxmatches*/
+			if ((pair->b - pair->a) >= maxmatches) {
+				continue;
+			}
+
+			ptr = (suffix_array->suffixptr[suffix_array->suftab[j]]);
+			const IntSequence * sequence_b = sequences[match->id];
+			const int response = filter(space, match, sequence_a, sequence_b, ptr, substrlen, i, info);
+			if (response == -1) {
+				break;
+			}
+
 		}
 	}
 
-	occ = sel(space, occ, k, queryseq, s, info);
+	selected = selector(space, selected, k, sequence_a, sequences, info);
 
-	l = 0;
+	int length = 0;
+	int response = 0;
 	for (i = k; i > 0; i--) {
-		retval = handler(space, &occ[i - 1], s, len, l, info);
-		if (retval)
-			l++;
-		if (retval == -1)
+		const Matchtype * match = &selected[i - 1];
+		if ((response = handler(space, match, sequences, len, length, info))) {
+			length++;
+		}
+		if (response == -1) {
 			break;
+		}
 	}
 
-	FREEMEMORY(space, hashTable);
+	FREEMEMORY(space, hash_table);
 
 	for (i = 0; i < k; i++) {
-		FREEMEMORY(space, occ[i].pos);
-		FREEMEMORY(space, occ[i].org);
+		FREEMEMORY(space, selected[i].pos);
+		FREEMEMORY(space, selected[i].org);
 	}
 
-	FREEMEMORY(space, occ);
+	FREEMEMORY(space, selected);
 }
 

@@ -242,17 +242,6 @@ int allscores(void *space, Matchtype *m, IntSequence **s, Uint len, Uint match, 
 
 	printf("gapless sw score: %f\n", m->swscore);
 
-	if (imbiss->reportfile) {
-
-		query = tokensToStringset(space, "/.", s[m->id]->url, strlen(s[m->id]->url));
-
-		fp = fopen(imbiss->reportfile, "a+");
-		fprintf(fp, "%s\t%f\t%d\n", query->strings[query->noofstrings - 1].str, rmsd, s[m->id]->length);
-		fclose(fp);
-
-		destructStringset(space, query);
-	}
-
 	/*report blast stuff*/
 	printf("highest seed score (HSS): %f\n", m->blast);
 	/*printf("lambda*S %19.16e\n", m->blast *((imbissinfo*)info)->lambda);*/
@@ -277,24 +266,19 @@ int main(int argc, char** argv) {
 	Sint optindex, c;
 	unsigned char depictsw = 0;
 	unsigned char wurst = 1;
-	unsigned char gnuplot = 0;
 
-	Uint i, j, noofseqs = 0, nooffreqs = 0, noofqueries = 0;
+	Uint i, noofqueries = 0;
 	Uint noofhits = 100;
 	Uint substrlen = 10;
 	Uint minseeds = 5;
 	Uint maxmatches = 10000;
-	char *seq, *vec, *bin;
+	char *vec, *bin;
 	imbissinfo *imbiss;
 	void *space = NULL;
 	double *scores = NULL;
 
 	int swscores[2] = { 3, -2 };
-	char *pveclistfile = NULL;
-	char *alphabetfile = NULL;
 	char *inputfile = NULL;
-	char *batchfile = NULL;
-	char *subfile = NULL;
 	char *reportfile = NULL;
 
 	int (*handler)(void *, Matchtype *, IntSequence **, Uint, Uint, void *) = allscores;
@@ -303,13 +287,11 @@ int main(int argc, char** argv) {
 
 	Matchtype* (*select)(void *, Matchtype *, Uint k, IntSequence *, IntSequence **, void *) = selectSW;
 
-	stringset_t **fn, **freq, *queryurl, **queries = NULL;
+	stringset_t *queryurl, **queries = NULL;
 	Suffixarray *suffix_array = NULL;
-	IntSequence **sequences = NULL;
 	IntSequence *input = NULL;
 	FAlphabet *alphabet = NULL;
 	PairSint *matches = NULL;
-	Uint percent = 0;
 
 	time_t startsuf, endsuf;
 	double difsuf, difmatch, difrank;
@@ -348,7 +330,6 @@ int main(int argc, char** argv) {
 			depictsw = 1;
 			break;
 		case 's':
-			pveclistfile = optarg;
 			break;
 		case 'q':
 			inputfile = optarg;
@@ -361,10 +342,8 @@ int main(int argc, char** argv) {
 			minseeds = atoi(optarg);
 			break;
 		case 'p':
-			percent = atoi(optarg);
 			break;
 		case 'x':
-			subfile = optarg;
 			break;
 		case 'n':
 			noofhits = atoi(optarg);
@@ -402,7 +381,6 @@ int main(int argc, char** argv) {
 			swscores[1] = atoi(optarg);
 			break;
 		case 'g':
-			gnuplot = 1;
 			break;
 		case 'm':
 			maxmatches = atoi(optarg);
@@ -427,18 +405,17 @@ int main(int argc, char** argv) {
 	zlog_debug(logger, "Load:\t%s", file_abc);
 	alphabet = alphabet_load_csv(space, file_abc);
 
-	/*load sequence database*/
+	Uint sequence_count = 0;
 	zlog_debug(logger, "Load:\t%s", file_seq);
-	sequences = sequence_load_csv(space, file_seq, "", &noofseqs);
+	/*load sequence database*/
+	IntSequence **sequences_wurst = sequence_load_csv(space, file_seq, "", &sequence_count, sequence_load_wurst);
 
 	time_t time_start, time_end;
-	double time_diff;
 
 	time(&time_start);
-	suffix_array = suffix_array_init(space, sequences, noofseqs, NULL);
+	suffix_array = suffix_array_init(space, sequences_wurst, sequence_count, NULL);
 	time(&time_end);
-	time_diff = difftime(time_end, time_start);
-	zlog_debug(logger, "Time:\t suffix array in %f sec", time_diff);
+	zlog_debug(logger, "Time:\t suffix array in %f sec", difftime(time_end, time_start));
 
 	/*do search*/
 	for (i = 0; i < noofqueries; i++) {
@@ -446,18 +423,15 @@ int main(int argc, char** argv) {
 		/*get query form batchfile*/
 		inputfile = SETSTR(queries[i], 0);
 
-		input = sequence_load_file(space, inputfile);
-		//seq = printSequence (space, input, 60);
-		//printf(">IMBISS order delivered\n");
-		//printf("%s\n",seq);
-		//FREEMEMORY(space, seq);
-		//continue;
+		input = sequence_load_wurst(space, inputfile);
+		const char * sequence_printable = sequence_userfriendly(space, input, 60);
+		zlog_debug(logger, "Sequence:\n %s", sequence_printable);
 
 		time(&time_start);
 		matches = sufSubstring(space, suffix_array, input->sequence, input->length, substrlen);
 		time(&time_end);
-		time_diff = difftime(time_end, time_start);
-		zlog_debug(logger, "Time:\t suffix array match in %f sec", time_diff);
+
+		zlog_debug(logger, "Time:\t suffix array match in %f sec", difftime(time_end, time_start));
 
 		/*get prob vector url for salami/wurst*/
 		//printf("%.*s\n", 5, input->url + 58);
@@ -470,7 +444,7 @@ int main(int argc, char** argv) {
 		addString(space, queryurl, bin, strlen(bin));
 		addString(space, queryurl, vec, strlen(vec));
 
-		getimbissblast(space, input, sequences, noofseqs, alphabet, imbiss);
+		getimbissblast(space, input, sequences_wurst, sequence_count, alphabet, imbiss);
 
 		imbiss->query = queryurl;
 		imbiss->substrlen = substrlen;
@@ -482,8 +456,8 @@ int main(int argc, char** argv) {
 		imbiss->consensus = ALLOCMEMORY(space, NULL, Uint, (input->length - substrlen));
 		memset(imbiss->consensus, 0, (sizeof(Uint) * (input->length - substrlen)));
 
-		rankSufmatch(space, suffix_array, matches, (input->length - substrlen), maxmatches, substrlen, sequences,
-				noofseqs, filter, select, handler, input, imbiss, scores, depictsw);
+		rankSufmatch(space, suffix_array, matches, (input->length - substrlen), maxmatches, substrlen, sequences_wurst,
+				sequence_count, filter, select, handler, input, imbiss, scores, depictsw);
 
 		time(&endsuf);
 		difrank = difftime(endsuf, startsuf);
@@ -504,10 +478,10 @@ int main(int argc, char** argv) {
 	}
 
 	/*final cleanup*/
-	for (i = 0; i < noofseqs; i++) {
-		destructSequence(space, sequences[i]);
+	for (i = 0; i < sequence_count; i++) {
+		destructSequence(space, sequences_wurst[i]);
 	}
-	FREEMEMORY(space, sequences);
+	FREEMEMORY(space, sequences_wurst);
 	suffix_array_destruct(space, suffix_array);
 	zlog_fini();
 

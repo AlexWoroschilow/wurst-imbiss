@@ -13,8 +13,7 @@
  * 
  */
 
-char *
-printSequence(void *space, IntSequence *s, Uint cols) {
+char * printSequence(void *space, IntSequence *s, Uint cols) {
 	Uint i, c, k, pos = 0, l = 0, width = 0;
 	char *buf, *buf2;
 	stringset_t *entries;
@@ -269,7 +268,15 @@ IntSequence* loadSequence(void *space, char *filename) {
 	return s;
 }
 
-IntSequence* sequence_load_file(void *space, char *filename) {
+char * sequence_userfriendly(void *space, IntSequence *s, Uint cols) {
+	return printSequence(space, s, cols);
+}
+
+IntSequence* sequence_load_pdb(void *space, char *filename) {
+	return loadSequence(space, filename);
+}
+
+IntSequence* sequence_load_wurst(void *space, char *filename) {
 	return loadSequence(space, filename);
 }
 
@@ -359,14 +366,14 @@ initSequence(void *space) {
 	return s;
 }
 
-IntSequence ** sequence_load_csv(void *space, char* filename, char *delimeter, Uint *linecount) {
-
+IntSequence ** sequence_load_csv(void *space, char* filename, char *delimeter, Uint *linecount,
+		IntSequence* (*loader)(void *space, char *filename)) {
 	Uint i;
 	stringset_t **fn = readcsv(space, filename, delimeter, linecount);
 	IntSequence ** sequences = ALLOCMEMORY(space, NULL, IntSequence *, *linecount);
 	for (i = 0; i < *linecount; i++) {
 		const char * file = (const char *) SETSTR(fn[i], 0);
-		sequences[i] = sequence_load_file(space, file);
+		sequences[i] = loader(space, file);
 	}
 
 	for (i = 0; i < *linecount; i++) {

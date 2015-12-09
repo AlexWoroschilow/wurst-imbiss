@@ -6,6 +6,9 @@
 #include "stringutils.h"
 #include "fileio.h"
 #include "intsequence.h"
+#include "salami.h"
+#include "massert.h"
+
 
 /* ----------------------------- printSequence -------------------------------
  *    
@@ -221,6 +224,10 @@ void dumpSequence(IntSequence *s) {
 	printf("\n");
 }
 
+void sequence_dump(IntSequence *s) {
+	return dumpSequence(s);
+}
+
 /*------------------------------- loadSequence -------------------------------
  *  loads a sequence from a file.   
  * 
@@ -272,8 +279,48 @@ char * sequence_userfriendly(void *space, IntSequence *s, Uint cols) {
 	return printSequence(space, s, cols);
 }
 
+IntSequence* sequence_init(void *space) {
+	return initSequence(space);
+}
+
 IntSequence* sequence_load_pdb(void *space, char *filename) {
-	return loadSequence(space, filename);
+	long size;
+	FILE *infile;
+
+	massert(((infile = fopen(filename, "r"))!= NULL), "couldn't open file");
+
+	fseek(infile, 0, SEEK_END);
+	size = ftell(infile);
+	rewind(infile);
+
+	IntSequence *sequence = sequence_init(space);
+	fread(sequence, sizeof(IntSequence), 1, infile);
+
+	sequence->description = ALLOCMEMORY(space, NULL, char, sequence->descrlen + 1);
+	sequence->alphabetname = ALLOCMEMORY(space, NULL, char, sequence->namelen + 1);
+	sequence->url = ALLOCMEMORY(space, NULL, char, sequence->urllen + 1);
+
+	fread(sequence->description, sizeof(char), sequence->descrlen + 1, infile);
+	fread(sequence->alphabetname, sizeof(char), sequence->namelen + 1, infile);
+	fread(sequence->url, sizeof(char), sequence->urllen + 1, infile);
+
+	Uint *sequence_chain = ALLOCMEMORY(space, NULL, Uint, sequence->length);
+	fread(sequence_chain, sizeof(Uint), sequence->length, infile);
+
+	Uint *info = ALLOCMEMORY(space, NULL, Uint, sequence->length);
+	fread(info, sizeof(Uint), sequence->length, infile);
+
+	char * sequence_chain_pdb = salami_sequence_string(sequence);
+	printf("%s", sequence_chain_pdb);
+
+	sequence->sequence = sequence_chain;
+	sequence->info = info;
+
+	massert((fclose(infile) != EOF), "couldn't close file");
+
+	sequence_dump(sequence);
+
+	return sequence;
 }
 
 IntSequence* sequence_load_wurst(void *space, char *filename) {

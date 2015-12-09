@@ -338,7 +338,7 @@ int main(int argc, char** argv) {
 	IntSequence **sequences_wurst = sequence_load_csv(space, file_seq, "", &sequence_count, sequence_load_pdb);
 	time(&time_end);
 
-	zlog_debug(logger, "Time:\t wurst sequences loaded in %f sec", difftime(time_end, time_start));
+	zlog_debug(logger, "Time:\t pdb sequences loaded in %f sec", difftime(time_end, time_start));
 
 	time(&time_start);
 	suffix_array = suffix_array_init(space, sequences_wurst, sequence_count, NULL);

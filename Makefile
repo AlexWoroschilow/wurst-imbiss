@@ -164,6 +164,35 @@ WURSTIMBISSOBJ   = ./vendor/gnuplot/gnuplot_i.o\
 	./inc/imbissblast.c\
 	wurstimbiss.o\
 
+SEQIMBISSOBJ   = ./vendor/gnuplot/gnuplot_i.o\
+	./lib/memman.o\
+	./lib/list.o\
+	./lib/vtprogressbar.o\
+	./lib/sort.o\
+	./lib/cantor.o\
+	./lib/stack.o\
+	./lib/mathematics.o\
+	./lib/stringutils.o\
+	./lib/boyermoore.o\
+	./lib/fileio.o\
+	./lib/dpalign.c\
+	./lib/hash.c\
+	./inc/falphabet.o\
+	./inc/createalphabet.o\
+	./inc/encodeprobvec.o\
+	./inc/intsequence.o\
+	./inc/sufarray.o\
+	./inc/depictseqs.o\
+	./inc/mm.o\
+	./inc/sufmatch.o\
+	./inc/multiseq.o\
+	./inc/salami.o\
+	./inc/probseqscore.c\
+	./inc/blaststat.c\
+	./inc/imbissblast.c\
+	seqimbiss.o\
+
+
 IMSUBSTOBJ    = ./inc/prob_vec.o\
 	./inc/mprintf.o\
 	./lib/memman.o\
@@ -188,7 +217,7 @@ IMSUBSTOBJ    = ./inc/prob_vec.o\
 
 
 
-all: readprobseq.x bmprobseq.x probvectest.x convertprobvec.x sufprobseq.x wurstimbiss.x createsubmatrix.x
+all: readprobseq.x bmprobseq.x probvectest.x convertprobvec.x sufprobseq.x wurstimbiss.x seqimbiss.x createsubmatrix.x
 
 
 mathematicstest.x: ${MATHEMATICSTESTOBJ}
@@ -223,6 +252,10 @@ convertprobvec.x: ${CONVERTPROBVECOBJ}
 
 wurstimbiss.x: ${WURSTIMBISSOBJ}
 	gcc $(CFLAGS) ${WURSTIMBISSOBJ} -o $@ $(LDFLAGS)
+
+seqimbiss.x: ${SEQIMBISSOBJ}
+	gcc $(CFLAGS) ${SEQIMBISSOBJ} -o $@ $(LDFLAGS)
+
 
 clean: 
 	rm ./inc/*.o

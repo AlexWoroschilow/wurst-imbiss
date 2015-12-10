@@ -398,19 +398,19 @@ double scorefilter(void *space, Matchtype *m, IntSequence *a, IntSequence *b, Ui
 	return sum > 0 ? sum : 0;
 }
 
-double swconstfilter(void *space, Matchtype *m, IntSequence *a, IntSequence *b, Uint *ptr, Uint len, Uint pos,
+double swconstfilter(void *space, Matchtype *match, IntSequence *a, IntSequence *b, Uint *ptr, Uint len, Uint pos,
 		void *info) {
 
-	imbissinfo *imbiss;
-	int *swres;
+	int *swres = NULL;
+	imbissinfo *imbiss = NULL;
 	double t;
 
 	imbiss = (imbissinfo*) info;
-	t = scorefilter(space, m, a, b, ptr, len, pos, info);
+	t = scorefilter(space, match, a, b, ptr, len, pos, info);
 
-	if (m->count == imbiss->minseeds) {
+	if (match->count == imbiss->minseeds) {
 		swres = swgapless(space, a->sequence, a->length, b->sequence, b->length, constscr, imbiss->swscores);
-		m->swscore = swres[arraymax(swres, (a->length + 1) * (b->length + 1))];
+		match->swscore = swres[arraymax(swres, (a->length + 1) * (b->length + 1))];
 
 		FREEMEMORY(space, swres);
 	}

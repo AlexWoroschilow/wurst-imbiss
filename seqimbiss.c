@@ -115,9 +115,6 @@ int allscores(void *space, Matchtype *m, IntSequence **s, Uint len, Uint match, 
 	printf("log(HSS): %f\n", log10(E));
 	printf("1-exp(-HSS): %19.16e\n", 1 - exp(-E));
 
-	printf("[%d]: score: %f, count: %d\n", match, m->score, m->count);
-	printf("%d\t%s\t%d\t", m->id, s[m->id]->url, m->count);
-
 	printf("CSV;%d;%s;%d;", m->id, s[m->id]->url, m->count);
 	printf("%d;%f;%d;", match, m->score, m->count);
 	printf("[%s];%s;", pic, s[m->id]->description);

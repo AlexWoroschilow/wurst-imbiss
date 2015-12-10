@@ -84,119 +84,6 @@ required_argument, 0, 's' }, { "query", required_argument, 0, 'q' }, { "matchlen
 				"maxmatches", required_argument, 0, 'm' }, { "help", no_argument, 0, 'h' }, { "gnuplot", no_argument, 0,
 				'g' }, { 0, 0, 0, 0 } };
 
-/*------------------------------- getProbChar --------------------------------
- *    
- * returns the position of character from a probability sequence over the 
- * given alphabet of size asize
- * 
- */
-
-Uint getProbChar(void *alphabet, Uint aszize, void *p, Uint pos) {
-	/*at this point of the development alphabet is a stub*/
-	/*FAlphabet *a = (FAlphabet *)alphabet;*/
-	IntSequence *seq = (IntSequence *) p;
-	Uint ch = seq->sequence[pos];
-
-	return ch;
-}
-
-int latexscores(void *space, Matchtype *m, IntSequence **s, Uint len, Uint match, void *info) {
-	int sw;
-	double explambda, E;
-
-	/*FILE* fp;*/
-
-	struct salami_info* salami;
-	imbissinfo *imbiss;
-	stringset_t *query;
-
-	imbiss = (imbissinfo*) info;
-
-	if (m->count <= imbiss->minseeds)
-		return 0;
-	if (match > imbiss->noofhits)
-		return -1;
-
-	query = tokensToStringset(space, "/.", s[m->id]->url, strlen(s[m->id]->url));
-
-	explambda = exp(-imbiss->lambda * m->blast);
-	E = imbiss->K * 2500000 * imbiss->substrlen * explambda;
-	sw = floor(m->swscore);
-
-	salami = doWurstAlignment(space, m, s, len, imbiss->query);
-
-	printf("%s & %s & %.2f & %d & %.2f & %.2f & %.2f & %.2f\\\\ \n", query->strings[query->noofstrings - 1].str,
-			s[m->id]->description, m->score, sw, salami->sw_score_tot, salami->id, log10(E), salami->rmsd);
-
-	/* latexWurstAlignment(space, m, s, len, ((imbissinfo*)info)->query);
-	 */
-	FREEMEMORY(space, salami);
-	destructStringset(space, query);
-
-	return 1;
-}
-
-void consensus(void *space, Uint *consensus, Uint len, IntSequence *query, Uint seedlen, void* info) {
-
-	Uint i, j;
-	char *constr;
-	double sum, norm;
-	double *consensus_double;
-	double *seedprobability;
-
-	imbissinfo *imbiss;
-	IntSequence *consensusSequence;
-	gnuplot_ctrl *h;
-
-	imbiss = (imbissinfo*) info;
-
-	seedprobability = ALLOCMEMORY(space, NULL, double, len);
-	for (i = 0; i < len; i++) {
-		for (sum = 0.0, j = 0; j < seedlen; j++) {
-			sum += imbiss->score[(Uint) query->sequence[i + j]];
-		}
-		seedprobability[i] = log10(imbiss->K * 2500000 * seedlen * exp(-(double) imbiss->lambda * sum));
-	}
-
-	consensusSequence = initSequence(space);
-	consensusSequence->sequence = consensus;
-	consensusSequence->length = len;
-
-	constr = printSequence(space, consensusSequence, 60);
-	printf("%s\n", constr);
-	FREEMEMORY(space, constr);
-
-	consensus_double = ALLOCMEMORY(space, NULL, double, len);
-
-	h = gnuplot_init();
-	gnuplot_setstyle(h, "lines");
-	sum = 0;
-	for (i = 0; i < len; i++) {
-		sum += consensus[i];
-	}
-
-	for (i = 0; i < len; i++) {
-		norm = consensus[i];
-		norm = (norm > 0) ? norm : 1;
-		consensus_double[i] = log10(norm);
-
-		/*	log10(imbiss->K*3000000*len*exp(-(double)consensus[i]));
-		 if (consensus_double[i] < -400) consensus_double[i]=-400;*/
-	}
-
-	gnuplot_cmd(h, "set title 'IMBISS - seed statistics' -28,0 font'Helvetica,15'");
-	gnuplot_cmd(h, "set label '%s' at screen 0.12,0.92 font 'Helvetica,12'", imbiss->query->strings[0].str);
-	gnuplot_cmd(h, "set label 'seed length: %d' at graph 0.05,0.95 font 'Helvetica, 12'", seedlen);
-	gnuplot_set_xlabel(h, "query sequence residue");
-	gnuplot_set_ylabel(h, "log");
-	gnuplot_plot_x(h, consensus_double, len, "log(number of matches)");
-	gnuplot_plot_x(h, seedprobability, len, "log(Kmn*e^{lambda*score(seed)})");
-
-	FREEMEMORY(space, seedprobability);
-	FREEMEMORY(space, consensus_double);
-	FREEMEMORY(space, consensusSequence);
-}
-
 /*-------------------------------- allscores ---------------------------------
  *    
  * a handler function for ranked suffix matches
@@ -232,17 +119,6 @@ int allscores(void *space, Matchtype *m, IntSequence **s, Uint len, Uint match, 
 	printf("[%s]\n", pic);
 	printf("%s\n", s[m->id]->description);
 
-	//if (imbiss->wurst) {
-	//salami = doWurstAlignment(space, m, s, len, imbiss->query);
-	//printf("sequence identity: %f\n", salami->id);
-	//printf("scr: %f (%f), scr_tot: %f, cvr: %f (raw: %d)\n", salami->sw_score, salami->sw_smpl_score,
-	//salami->sw_score_tot, salami->sw_cvr, salami->sw_raw);
-	//printf("frac_dme: %f, z_scr: %f, rmsd: %f, andrew_scr %f\n", salami->frac_dme, salami->z_scr, salami->rmsd,
-	//	salami->andrew_scr);
-	//printf("tm_scr %f\n", salami->tmscore);
-	//FREEMEMORY(space, salami);
-	//}
-
 	printf("gapless sw score: %f\n", m->swscore);
 
 	/*report blast stuff*/
@@ -271,8 +147,6 @@ int main(int argc, char** argv) {
 	unsigned char wurst = 0;
 
 	Uint i, noofqueries = 0;
-	Uint noofhits = 100;
-	Uint substrlen = 10;
 	Uint minseeds = 5;
 	Uint maxmatches = 10000;
 	imbissinfo *imbiss;
@@ -297,13 +171,15 @@ int main(int argc, char** argv) {
 	double difsuf, difmatch, difrank;
 
 	Config *cfg = NULL;
+	Uint maximal_match, minimal_length;
 	char file_batch[1024], file_sub[1024], file_abc[1024], file_seq[1024];
 	assert(ConfigReadFile("wurstimbiss.conf", &cfg) == CONFIG_OK);
 	ConfigReadString(cfg, "sources", "file_batch", file_batch, sizeof(file_batch), 0);
 	ConfigReadString(cfg, "sources", "file_sub", file_sub, sizeof(file_sub), 0);
 	ConfigReadString(cfg, "sources", "file_abc", file_abc, sizeof(file_abc), 0);
 	ConfigReadString(cfg, "sources", "file_seq", file_seq, sizeof(file_seq), 0);
-
+	ConfigReadUnsignedInt(cfg, "limits", "maximal_match", &maximal_match, 100);
+	ConfigReadUnsignedInt(cfg, "limits", "minimal_length", &minimal_length, 10);
 	ConfigFree(cfg);
 
 	zlog_category_t *logger;
@@ -313,11 +189,13 @@ int main(int argc, char** argv) {
 	zlog_info(logger, "File seq:\t%s", file_seq);
 	zlog_info(logger, "File str:\t%s", file_batch);
 	zlog_info(logger, "File sub:\t%s", file_sub);
+	zlog_info(logger, "Max:\t%d matches from suffix array", maximal_match);
+	zlog_info(logger, "Min:\t%d characters", minimal_length);
 
 	imbiss = ALLOCMEMORY(space, NULL, imbissinfo, 1);
 	imbiss->reportfile = reportfile;
 	imbiss->swscores = swscores;
-	imbiss->noofhits = noofhits;
+	imbiss->noofhits = maximal_match;
 	imbiss->minseeds = minseeds;
 	imbiss->wurst = wurst;
 
@@ -352,31 +230,32 @@ int main(int argc, char** argv) {
 		sequence_dump_aacid(sequence);
 
 		time(&time_start);
-		matches = sufSubstring(space, suffix_array, sequence->sequence, sequence->length, substrlen);
+		matches = sufSubstring(space, suffix_array, sequence->sequence, sequence->length, minimal_length);
 		time(&time_end);
 
 		zlog_debug(logger, "Time:\t suffix array match in %f sec", difftime(time_end, time_start));
 
-		char *binary = scr_printf("/smallfiles/public/no_backup/bm/pdb_all_bin/%5s.bin\0", sequence->url + 56);
-		char *vector = scr_printf("/smallfiles/public/no_backup/bm/pdb_all_vec_6mer_struct/%5s.vec\0", sequence->url + 56);
+		char *vector = malloc(sizeof(char) * 66);
+		sprintf(vector, "/smallfiles/public/no_backup/bm/pdb_all_vec_6mer_struct/%5s.vec\0", sequence->url + 56);
+		//char *vector = scr_printf("/smallfiles/public/no_backup/bm/pdb_all_vec_6mer_struct/%5s.vec\0", sequence->url + 56);
+
+		char *binary = malloc(sizeof(char) * 54);
+		sprintf(binary, "/smallfiles/public/no_backup/bm/pdb_all_bin/%5s.bin\0", sequence->url + 56);
+		//char *binary = scr_printf("/smallfiles/public/no_backup/bm/pdb_all_bin/%5s.bin\0", sequence->url + 56);
 
 		queryurl = initStringset(space);
 		addString(space, queryurl, binary, strlen(binary));
 		addString(space, queryurl, vector, strlen(vector));
 
 		imbiss->query = queryurl;
-		imbiss->substrlen = substrlen;
+		imbiss->substrlen = minimal_length;
 		imbiss->alphabet = alphabet;
 
-		imbiss->consensus = ALLOCMEMORY(space, NULL, Uint, (sequence->length - substrlen));
-		memset(imbiss->consensus, 0, (sizeof(Uint) * (sequence->length - substrlen)));
-
-		rankSufmatch(space, suffix_array, matches, (sequence->length - substrlen), maxmatches, substrlen, sequences,
-				sequence_count, filter, select, handler, sequence, imbiss, scores, depictsw);
+		rankSufmatch(space, suffix_array, matches, (sequence->length - minimal_length), maxmatches, minimal_length,
+				sequences, sequence_count, filter, select, handler, sequence, imbiss, scores, depictsw);
 
 		destructSequence(space, sequence);
 
-		FREEMEMORY(space, imbiss->consensus);
 		FREEMEMORY(space, imbiss->score);
 		FREEMEMORY(space, matches);
 	}

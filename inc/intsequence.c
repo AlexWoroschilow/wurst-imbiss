@@ -290,6 +290,7 @@ IntSequence* sequence_init(void *space) {
 Uint * salami_sequence_to_uint_sequence(struct salami_sequence * sequence) {
 	unsigned long i;
 	Uint * sequence_uint = ALLOCMEMORY(space, NULL, Uint, sequence->length);
+	printf("%s\n", sequence->sequence);
 	for (i = 0; i < sequence->length; i++) {
 		sequence_uint[i] = (Uint) sequence->sequence[i];
 	}
@@ -307,7 +308,7 @@ IntSequence* sequence_load_pdb(void *space, char *filename) {
 	rewind(infile);
 
 	IntSequence *sequence = sequence_init(space);
-	fread(sequence, sizeof(IntSequence), 1, infile);
+	fread(sequence, sizeof(*sequence), 1, infile);
 
 	sequence->description = ALLOCMEMORY(space, NULL, char, sequence->descrlen + 1);
 	sequence->alphabetname = ALLOCMEMORY(space, NULL, char, sequence->namelen + 1);
@@ -328,6 +329,8 @@ IntSequence* sequence_load_pdb(void *space, char *filename) {
 	sequence->info = info;
 
 	massert((fclose(infile) != EOF), "couldn't close file");
+
+	sequence_dump(sequence);
 
 	return sequence;
 }

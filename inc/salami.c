@@ -41,6 +41,7 @@
 #include "lsqf.h"
 #include "seq.h"
 #include "massert.h"
+#include "read_seq_i.h"
 
 struct score_struct {
 	float scr_tot;
@@ -204,10 +205,7 @@ struct salami_sequence * salami_sequence_string(IntSequence *sequence) {
 	massert((response != NULL), "Salami sequence object can not be null");
 
 	response->length = sequence_wurst->length;
-	response->sequence = malloc(sizeof(char) * response->length);
-	massert((response->sequence != NULL), "Salami sequence can not be null");
-
-	strcpy(response->sequence, sequence_wurst->seq);
+	response->sequence = seq_print(sequence_wurst);
 
 	coord_destroy(coordinates);
 	seq_destroy(sequence_wurst);

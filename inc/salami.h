@@ -16,7 +16,7 @@
 #include "sufmatch.h"
 
 struct salami_sequence {
-	char * sequence;
+	const char * sequence;
 	unsigned int length;
 };
 

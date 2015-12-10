@@ -135,7 +135,7 @@ int main(int argc, char** argv) {
 
 	Uint i, noofqueries = 0;
 	Uint maxmatches = 10000;
-	Uint minseeds = 5;
+	Uint minseeds = 3;
 	void *space = NULL;
 
 	double *scores = NULL;

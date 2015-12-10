@@ -223,31 +223,6 @@ void dumpSequence(IntSequence *s) {
 	printf("\n");
 }
 
-void sequence_dump(IntSequence *s) {
-	sequence_dump_salami(s);
-}
-
-void sequence_dump_salami(IntSequence *s) {
-	dumpSequence(s);
-}
-
-void sequence_dump_aacid(IntSequence *s) {
-	Uint i;
-	printf("sequence:\n");
-	for (i = 0; i < s->length; i++) {
-		printf("%c", s->sequence[i]);
-		if (i != (s->length - 1))
-			printf("-");
-	}
-	printf("\n");
-	printf("info:\n");
-	for (i = 0; i < s->length; i++) {
-		printf("%d", s->info[i]);
-		if (i != (s->length - 1))
-			printf("-");
-	}
-	printf("\n");
-}
 
 /*------------------------------- loadSequence -------------------------------
  *  loads a sequence from a file.   
@@ -296,74 +271,11 @@ IntSequence* loadSequence(void *space, char *filename) {
 	return s;
 }
 
-char * sequence_userfriendly(void *space, IntSequence *s, Uint cols) {
-	return printSequence(space, s, cols);
-}
-
-IntSequence* sequence_init(void *space) {
-	return initSequence(space);
-}
-
-/**
- * Convert salami sequence string to
- * Uint sequence string, needs for correct work
- * with suffix array and so on
- */
-Uint * salami_sequence_to_uint_sequence(struct salami_sequence * sequence) {
-	unsigned long i;
-	Uint * sequence_uint = ALLOCMEMORY(space, NULL, Uint, sequence->length);
-	for (i = 0; i < sequence->length; i++) {
-		sequence_uint[i] = (Uint) sequence->sequence[i];
-	}
-	return sequence_uint;
-}
-
-IntSequence* sequence_load_pdb(void *space, char *filename) {
-	long size;
-	FILE *infile;
-
-	massert(((infile = fopen(filename, "r"))!= NULL), "couldn't open file");
-
-	fseek(infile, 0, SEEK_END);
-	size = ftell(infile);
-	rewind(infile);
-
-	IntSequence *sequence = sequence_init(space);
-	fread(sequence, sizeof(*sequence), 1, infile);
-
-	sequence->description = ALLOCMEMORY(space, NULL, char, sequence->descrlen + 1);
-	sequence->alphabetname = ALLOCMEMORY(space, NULL, char, sequence->namelen + 1);
-	sequence->url = ALLOCMEMORY(space, NULL, char, sequence->urllen + 1);
-
-	fread(sequence->description, sizeof(char), sequence->descrlen + 1, infile);
-	fread(sequence->alphabetname, sizeof(char), sequence->namelen + 1, infile);
-	fread(sequence->url, sizeof(char), sequence->urllen + 1, infile);
-
-	Uint *info = ALLOCMEMORY(space, NULL, Uint, sequence->length);
-	fread(info, sizeof(Uint), sequence->length, infile);
-
-	struct salami_sequence * sequence_salami = salami_sequence_string(sequence);
-	massert((sequence_salami != NULL), "Salami sequence can not be null");
-
-	sequence->length = sequence_salami->length;
-	sequence->sequence = salami_sequence_to_uint_sequence(sequence_salami);
-	sequence->info = info;
-
-	massert((fclose(infile) != EOF), "couldn't close file");
-
-	sequence_dump_aacid(sequence);
-
-	return sequence;
-}
-
-IntSequence* sequence_load_wurst(void *space, char *filename) {
-	return loadSequence(space, filename);
-}
 
 /*------------------------------- saveSequence -------------------------------
  *
  *  saves the sequences to a file
- *  
+ *
  */
 
 void saveSequence(IntSequence *s, char *filename) {
@@ -446,6 +358,22 @@ initSequence(void *space) {
 	return s;
 }
 
+void destructSequence(void *space, IntSequence *sequence) {
+
+	FREEMEMORY(space, sequence->sequence);
+	FREEMEMORY(space, sequence->description);
+	FREEMEMORY(space, sequence->alphabetname);
+	FREEMEMORY(space, sequence->url);
+	FREEMEMORY(space, sequence->info);
+	FREEMEMORY(space, sequence);
+	return;
+}
+
+IntSequence* sequence_init(void *space) {
+	return initSequence(space);
+}
+
+
 IntSequence ** sequence_load_csv(void *space, char* filename, char *delimeter, Uint *linecount,
 		IntSequence* (*loader)(void *space, char *filename)) {
 	Uint i;
@@ -463,18 +391,97 @@ IntSequence ** sequence_load_csv(void *space, char* filename, char *delimeter, U
 	return sequences;
 }
 
+
+
+
+void sequence_dump(IntSequence *s) {
+	sequence_dump_salami(s);
+}
+
+void sequence_dump_salami(IntSequence *s) {
+	dumpSequence(s);
+}
+
+void sequence_dump_aacid(IntSequence *s) {
+	Uint i;
+	printf("sequence:\n");
+	for (i = 0; i < s->length; i++) {
+		printf("%c", s->sequence[i]);
+		if (i != (s->length - 1))
+			printf("-");
+	}
+	printf("\n");
+	printf("info:\n");
+	for (i = 0; i < s->length; i++) {
+		printf("%d", s->info[i]);
+		if (i != (s->length - 1))
+			printf("-");
+	}
+	printf("\n");
+}
+
+char * sequence_print(void *space, IntSequence *s, Uint cols) {
+	return printSequence(space, s, cols);
+}
+
+
+/**
+ * Convert salami sequence string to
+ * Uint sequence string, needs for correct work
+ * with suffix array and so on
+ */
+Uint * sequence_salami_to_uint(struct salami_sequence * sequence) {
+	unsigned long i;
+	Uint * sequence_uint = ALLOCMEMORY(space, NULL, Uint, sequence->length);
+	for (i = 0; i < sequence->length; i++) {
+		sequence_uint[i] = (Uint) sequence->sequence[i];
+	}
+	return sequence_uint;
+}
+
+IntSequence* sequence_aacid_load(void *space, char *filename) {
+	long size;
+	FILE *infile;
+
+	massert(((infile = fopen(filename, "r"))!= NULL), "couldn't open file");
+
+	fseek(infile, 0, SEEK_END);
+	size = ftell(infile);
+	rewind(infile);
+
+	IntSequence *sequence = sequence_init(space);
+	fread(sequence, sizeof(*sequence), 1, infile);
+
+	sequence->description = ALLOCMEMORY(space, NULL, char, sequence->descrlen + 1);
+	sequence->alphabetname = ALLOCMEMORY(space, NULL, char, sequence->namelen + 1);
+	sequence->url = ALLOCMEMORY(space, NULL, char, sequence->urllen + 1);
+
+	fread(sequence->description, sizeof(char), sequence->descrlen + 1, infile);
+	fread(sequence->alphabetname, sizeof(char), sequence->namelen + 1, infile);
+	fread(sequence->url, sizeof(char), sequence->urllen + 1, infile);
+
+	Uint *info = ALLOCMEMORY(space, NULL, Uint, sequence->length);
+	fread(info, sizeof(Uint), sequence->length, infile);
+
+	struct salami_sequence * sequence_salami = salami_sequence_string(sequence);
+	massert((sequence_salami != NULL), "Salami sequence can not be null");
+
+	sequence->length = sequence_salami->length;
+	sequence->sequence = sequence_salami_to_uint(sequence_salami);
+	sequence->info = info;
+
+	massert((fclose(infile) != EOF), "couldn't close file");
+
+	sequence_dump_aacid(sequence);
+
+	return sequence;
+}
+
+IntSequence* sequence_salami_load(void *space, char *filename) {
+	return loadSequence(space, filename);
+}
+
+
 void sequence_destruct(void *space, IntSequence *sequence) {
 	destructSequence(space, sequence);
 }
-
-void destructSequence(void *space, IntSequence *sequence) {
-
-	FREEMEMORY(space, sequence->sequence);
-	FREEMEMORY(space, sequence->description);
-	FREEMEMORY(space, sequence->alphabetname);
-	FREEMEMORY(space, sequence->url);
-	FREEMEMORY(space, sequence->info);
-	FREEMEMORY(space, sequence);
-	return;
-}
-

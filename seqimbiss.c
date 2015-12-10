@@ -335,7 +335,7 @@ int main(int argc, char** argv) {
 
 	/*load sequence database*/
 	time(&time_start);
-	IntSequence **sequences_wurst = sequence_load_csv(space, file_seq, "", &sequence_count, sequence_load_pdb);
+	IntSequence **sequences_wurst = sequence_load_csv(space, file_seq, "", &sequence_count, sequence_aacid_load);
 	time(&time_end);
 
 	zlog_debug(logger, "Time:\t pdb sequences loaded in %f sec", difftime(time_end, time_start));
@@ -352,8 +352,8 @@ int main(int argc, char** argv) {
 		/*get query form batchfile*/
 		inputfile = SETSTR(queries[i], 0);
 
-		input = sequence_load_wurst(space, inputfile);
-		const char * sequence_printable = sequence_userfriendly(space, input, 60);
+		input = sequence_aacid_load(space, inputfile);
+		const char * sequence_printable = sequence_print(space, input, 60);
 		zlog_debug(logger, "Sequence:\n %s", sequence_printable);
 
 		time(&time_start);

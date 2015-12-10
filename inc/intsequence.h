@@ -40,19 +40,7 @@ IntSequence** createSequenceHash(void *, Uint);
 /**
  * Convert sequence to printable format
  */
-char * sequence_userfriendly(void *space, IntSequence *s, Uint cols);
-
-/**
- * Load sequence from given file using wurst
- * the normal amino-acids based sequence should be loaded
- */
-IntSequence* sequence_load_pdb(void *space, char *filename);
-
-/**
- * Load sequence from given file using wurst
- * the structure-alphabet based sequence should be loaded
- */
-IntSequence* sequence_load_wurst(void *space, char *filename);
+char * sequence_print(void *space, IntSequence *s, Uint cols);
 
 /**
  * Load a sequence list from csv file
@@ -61,5 +49,17 @@ IntSequence* sequence_load_wurst(void *space, char *filename);
  */
 IntSequence ** sequence_load_csv(void *space, char* filename, char *delimeter, Uint *linecount,
 		IntSequence* (*loader)(void *space, char *filename));
+
+/**
+ * Load sequence from given file using wurst
+ * the normal amino-acids based sequence should be loaded
+ */
+IntSequence* sequence_aacid_load(void *space, char *filename);
+
+/**
+ * Load sequence from given file using wurst
+ * the structure-alphabet based sequence should be loaded
+ */
+IntSequence* sequence_salami_load(void *space, char *filename);
 
 #endif

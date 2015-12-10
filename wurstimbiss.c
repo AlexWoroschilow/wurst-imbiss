@@ -412,10 +412,10 @@ int main(int argc, char** argv) {
 
 	/*load sequence database*/
 	time(&time_start);
-	IntSequence **sequences_wurst = sequence_load_csv(space, file_seq, "", &sequence_count, sequence_load_wurst);
+	IntSequence **sequences_wurst = sequence_load_csv(space, file_seq, "", &sequence_count, sequence_salami_load);
 	time(&time_end);
 
-	zlog_debug(logger, "Time:\t loaded in %f sec", difftime(time_end, time_start));
+	zlog_debug(logger, "Time:\t wurst sequences loaded in %f sec", difftime(time_end, time_start));
 
 	time(&time_start);
 	suffix_array = suffix_array_init(space, sequences_wurst, sequence_count, NULL);
@@ -429,8 +429,8 @@ int main(int argc, char** argv) {
 		/*get query form batchfile*/
 		inputfile = SETSTR(queries[i], 0);
 
-		input = sequence_load_wurst(space, inputfile);
-		const char * sequence_printable = sequence_userfriendly(space, input, 60);
+		input = sequence_salami_load(space, inputfile);
+		const char * sequence_printable = sequence_print(space, input, 60);
 		zlog_debug(logger, "Sequence:\n %s", sequence_printable);
 
 		time(&time_start);
@@ -489,6 +489,7 @@ int main(int argc, char** argv) {
 	}
 	FREEMEMORY(space, sequences_wurst);
 	suffix_array_destruct(space, suffix_array);
+
 	zlog_fini();
 
 	printf("Goodbye.\n");

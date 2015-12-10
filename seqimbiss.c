@@ -218,10 +218,12 @@ int allscores(void *space, Matchtype *m, IntSequence **s, Uint len, Uint match, 
 	stringset_t *query;
 
 	imbiss = (imbissinfo*) info;
-	if (m->count <= imbiss->minseeds)
+	if (m->count <= imbiss->minseeds) {
 		return 0;
-	if (match > imbiss->noofhits)
+	}
+	if (match > imbiss->noofhits) {
 		return -1;
+	}
 
 	/*report score stuff*/
 	printf("[%d]: score: %f, count: %d\n", match, m->score, m->count);
@@ -230,16 +232,16 @@ int allscores(void *space, Matchtype *m, IntSequence **s, Uint len, Uint match, 
 	printf("[%s]\n", pic);
 	printf("%s\n", s[m->id]->description);
 
-	if (imbiss->wurst) {
-		salami = doWurstAlignment(space, m, s, len, imbiss->query);
-		printf("sequence identity: %f\n", salami->id);
-		printf("scr: %f (%f), scr_tot: %f, cvr: %f (raw: %d)\n", salami->sw_score, salami->sw_smpl_score,
-				salami->sw_score_tot, salami->sw_cvr, salami->sw_raw);
-		printf("frac_dme: %f, z_scr: %f, rmsd: %f, andrew_scr %f\n", salami->frac_dme, salami->z_scr, salami->rmsd,
-				salami->andrew_scr);
-		printf("tm_scr %f\n", salami->tmscore);
-		FREEMEMORY(space, salami);
-	}
+	//if (imbiss->wurst) {
+	//salami = doWurstAlignment(space, m, s, len, imbiss->query);
+	//printf("sequence identity: %f\n", salami->id);
+	//printf("scr: %f (%f), scr_tot: %f, cvr: %f (raw: %d)\n", salami->sw_score, salami->sw_smpl_score,
+	//salami->sw_score_tot, salami->sw_cvr, salami->sw_raw);
+	//printf("frac_dme: %f, z_scr: %f, rmsd: %f, andrew_scr %f\n", salami->frac_dme, salami->z_scr, salami->rmsd,
+	//	salami->andrew_scr);
+	//printf("tm_scr %f\n", salami->tmscore);
+	//FREEMEMORY(space, salami);
+	//}
 
 	printf("gapless sw score: %f\n", m->swscore);
 
@@ -266,20 +268,18 @@ int allscores(void *space, Matchtype *m, IntSequence **s, Uint len, Uint match, 
 int main(int argc, char** argv) {
 	Sint optindex, c;
 	unsigned char depictsw = 0;
-	unsigned char wurst = 1;
+	unsigned char wurst = 0;
 
 	Uint i, noofqueries = 0;
 	Uint noofhits = 100;
 	Uint substrlen = 10;
 	Uint minseeds = 5;
 	Uint maxmatches = 10000;
-	char *vec, *bin;
 	imbissinfo *imbiss;
 	void *space = NULL;
 	double *scores = NULL;
 
 	int swscores[2] = { 3, -2 };
-	char *inputfile = NULL;
 	char *reportfile = NULL;
 
 	int (*handler)(void *, Matchtype *, IntSequence **, Uint, Uint, void *) = allscores;
@@ -288,9 +288,8 @@ int main(int argc, char** argv) {
 
 	Matchtype* (*select)(void *, Matchtype *, Uint k, IntSequence *, IntSequence **, void *) = selectSW;
 
-	stringset_t *queryurl, **queries = NULL;
+	stringset_t *queryurl;
 	Suffixarray *suffix_array = NULL;
-	IntSequence *input = NULL;
 	FAlphabet *alphabet = NULL;
 	PairSint *matches = NULL;
 
@@ -324,51 +323,69 @@ int main(int argc, char** argv) {
 
 	time_t time_start, time_end;
 
-	queries = readcsv(space, file_batch, "", &noofqueries);
-
-	/*read alphabet*/
 	zlog_debug(logger, "Load:\t%s", file_abc);
 	alphabet = alphabet_load_csv(space, file_abc);
 
 	Uint sequence_count = 0;
 	zlog_debug(logger, "Load:\t%s", file_seq);
 
-	/*load sequence database*/
 	time(&time_start);
-	IntSequence **sequences_wurst = sequence_load_csv(space, file_seq, "", &sequence_count, sequence_aacid_load);
+	IntSequence **sequences = sequence_load_csv(space, file_seq, "", &sequence_count, sequence_aacid_load);
 	time(&time_end);
 
 	zlog_debug(logger, "Time:\t pdb sequences loaded in %f sec", difftime(time_end, time_start));
 
 	time(&time_start);
-	suffix_array = suffix_array_init(space, sequences_wurst, sequence_count, NULL);
+	suffix_array = suffix_array_init(space, sequences, sequence_count, NULL);
 	time(&time_end);
 
 	zlog_debug(logger, "Time:\t suffix array in %f sec", difftime(time_end, time_start));
 
 	/*do search*/
+	stringset_t ** queries = readcsv(space, file_batch, "", &noofqueries);
 	for (i = 0; i < noofqueries; i++) {
 
 		/*get query form batchfile*/
-		inputfile = SETSTR(queries[i], 0);
+		char *inputfile = SETSTR(queries[i], 0);
 
-		input = sequence_aacid_load(space, inputfile);
-		const char * sequence_printable = sequence_print(space, input, 60);
-		zlog_debug(logger, "Sequence:\n %s", sequence_printable);
+		IntSequence *sequence = sequence_aacid_load(space, inputfile);
+		sequence_dump_aacid(sequence);
 
 		time(&time_start);
-		matches = sufSubstring(space, suffix_array, input->sequence, input->length, substrlen);
+		matches = sufSubstring(space, suffix_array, sequence->sequence, sequence->length, substrlen);
 		time(&time_end);
 
 		zlog_debug(logger, "Time:\t suffix array match in %f sec", difftime(time_end, time_start));
 
+		char *binary = scr_printf("/smallfiles/public/no_backup/bm/pdb_all_bin/%5s.bin\0", sequence->url + 56);
+		char *vector = scr_printf("/smallfiles/public/no_backup/bm/pdb_all_vec_6mer_struct/%5s.vec\0", sequence->url + 56);
+
+		queryurl = initStringset(space);
+		addString(space, queryurl, binary, strlen(binary));
+		addString(space, queryurl, vector, strlen(vector));
+
+		imbiss->query = queryurl;
+		imbiss->substrlen = substrlen;
+		imbiss->alphabet = alphabet;
+
+		imbiss->consensus = ALLOCMEMORY(space, NULL, Uint, (sequence->length - substrlen));
+		memset(imbiss->consensus, 0, (sizeof(Uint) * (sequence->length - substrlen)));
+
+		rankSufmatch(space, suffix_array, matches, (sequence->length - substrlen), maxmatches, substrlen, sequences,
+				sequence_count, filter, select, handler, sequence, imbiss, scores, depictsw);
+
+		destructSequence(space, sequence);
+
+		FREEMEMORY(space, imbiss->consensus);
+		FREEMEMORY(space, imbiss->score);
+		FREEMEMORY(space, matches);
 	}
 
 	/*final cleanup*/
 	for (i = 0; i < sequence_count; i++) {
-		destructSequence(space, sequences_wurst[i]);
+		destructSequence(space, sequences[i]);
 	}
-	FREEMEMORY(space, sequences_wurst);
+	FREEMEMORY(space, sequences);
 	suffix_array_destruct(space, suffix_array);
 
 	zlog_fini();

@@ -62,4 +62,14 @@ IntSequence* sequence_aacid_load(void *space, char *filename);
  */
 IntSequence* sequence_salami_load(void *space, char *filename);
 
+/**
+ * Dump sequence with salami chain
+ */
+void sequence_dump_salami(IntSequence *s);
+
+/**
+ * Dump sequence with amino-acid chain
+ */
+void sequence_dump_aacid(IntSequence *s);
+
 #endif

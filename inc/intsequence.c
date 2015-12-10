@@ -373,7 +373,6 @@ IntSequence* sequence_init(void *space) {
 	return initSequence(space);
 }
 
-
 IntSequence ** sequence_load_csv(void *space, char* filename, char *delimeter, Uint *linecount,
 		IntSequence* (*loader)(void *space, char *filename)) {
 	Uint i;
@@ -390,9 +389,6 @@ IntSequence ** sequence_load_csv(void *space, char* filename, char *delimeter, U
 	FREEMEMORY(space, fn);
 	return sequences;
 }
-
-
-
 
 void sequence_dump(IntSequence *s) {
 	sequence_dump_salami(s);
@@ -424,12 +420,6 @@ char * sequence_print(void *space, IntSequence *s, Uint cols) {
 	return printSequence(space, s, cols);
 }
 
-
-/**
- * Convert salami sequence string to
- * Uint sequence string, needs for correct work
- * with suffix array and so on
- */
 Uint * sequence_salami_to_uint(struct salami_sequence * sequence) {
 	unsigned long i;
 	Uint * sequence_uint = ALLOCMEMORY(space, NULL, Uint, sequence->length);
@@ -443,7 +433,7 @@ IntSequence* sequence_aacid_load(void *space, char *filename) {
 	long size;
 	FILE *infile;
 
-	massert(((infile = fopen(filename, "r"))!= NULL), "couldn't open file");
+	massert(((infile = fopen(filename, "r"))!= NULL), "Couldn't open file");
 
 	fseek(infile, 0, SEEK_END);
 	size = ftell(infile);
@@ -470,9 +460,7 @@ IntSequence* sequence_aacid_load(void *space, char *filename) {
 	sequence->sequence = sequence_salami_to_uint(sequence_salami);
 	sequence->info = info;
 
-	massert((fclose(infile) != EOF), "couldn't close file");
-
-	sequence_dump_aacid(sequence);
+	massert((fclose(infile) != EOF), "Couldn't close file");
 
 	return sequence;
 }
@@ -480,7 +468,6 @@ IntSequence* sequence_aacid_load(void *space, char *filename) {
 IntSequence* sequence_salami_load(void *space, char *filename) {
 	return loadSequence(space, filename);
 }
-
 
 void sequence_destruct(void *space, IntSequence *sequence) {
 	destructSequence(space, sequence);

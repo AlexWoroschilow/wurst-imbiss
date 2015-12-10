@@ -119,6 +119,8 @@ int allscores(void *space, Matchtype *m, IntSequence **s, Uint len, Uint match, 
 	printf("%d;%f;%d;", match, m->score, m->count);
 	printf("[%s];%s;", pic, s[m->id]->description);
 	printf("%f;%f", m->swscore, m->blast);
+	printf("\n");
+
 	FREEMEMORY(space, pic);
 	return 1;
 }

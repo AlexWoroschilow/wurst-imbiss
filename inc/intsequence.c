@@ -242,7 +242,7 @@ void sequence_dump_aacid(IntSequence *s) {
 	printf("\n");
 	printf("info:\n");
 	for (i = 0; i < s->length; i++) {
-		printf("%c", s->info[i]);
+		printf("%d", s->info[i]);
 		if (i != (s->length - 1))
 			printf("-");
 	}
@@ -312,7 +312,6 @@ IntSequence* sequence_init(void *space) {
 Uint * salami_sequence_to_uint_sequence(struct salami_sequence * sequence) {
 	unsigned long i;
 	Uint * sequence_uint = ALLOCMEMORY(space, NULL, Uint, sequence->length);
-	printf("%s\n", sequence->sequence);
 	for (i = 0; i < sequence->length; i++) {
 		sequence_uint[i] = (Uint) sequence->sequence[i];
 	}

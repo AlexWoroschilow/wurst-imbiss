@@ -79,17 +79,16 @@
  * 
  */
 
-int allscores(void *space, Matchtype *m, IntSequence **s, Uint len, Uint match, void *info) {
+int allscores(void *space, Matchtype *matchtype, IntSequence **s, Uint len, Uint match, void *info) {
 	char *pic;
 	//float rmsd = -1;
 	double explambda, E;
 	//FILE* fp;
-	imbissinfo *imbiss;
+	imbissinfo *imbiss = (imbissinfo*) info;
 	//struct salami_info *salami;
 	//stringset_t *query;
 
-	imbiss = (imbissinfo*) info;
-	if (m->count <= imbiss->minseeds) {
+	if (matchtype->count <= imbiss->minseeds) {
 		return 0;
 	}
 	if (match > imbiss->noofhits) {
@@ -97,28 +96,28 @@ int allscores(void *space, Matchtype *m, IntSequence **s, Uint len, Uint match, 
 	}
 
 	/*report score stuff*/
-	printf("[%d]: score: %f, count: %d\n", match, m->score, m->count);
-	printf("%d\t%s\t%d\t", m->id, s[m->id]->url, m->count);
-	pic = depictSequence(space, len, 20, m->pos, m->count, '*');
+	printf("[%d]: score: %f, count: %d\n", match, matchtype->score, matchtype->count);
+	printf("%d\t%s\t%d\t", matchtype->id, s[matchtype->id]->url, matchtype->count);
+	pic = depictSequence(space, len, 20, matchtype->pos, matchtype->count, '*');
 	printf("[%s]\n", pic);
-	printf("%s\n", s[m->id]->description);
+	printf("%s\n", s[matchtype->id]->description);
 
-	printf("gapless sw score: %f\n", m->swscore);
+	printf("gapless sw score: %f\n", matchtype->swscore);
 
 	/*report blast stuff*/
-	printf("highest seed score (HSS): %f\n", m->blast);
+	printf("highest seed score (HSS): %f\n", matchtype->blast);
 	/*printf("lambda*S %19.16e\n", m->blast *((imbissinfo*)info)->lambda);*/
-	explambda = exp(-imbiss->lambda * m->blast);
+	explambda = exp(-imbiss->lambda * matchtype->blast);
 	/*printf("exp(-lambda*S): %19.16e\n", explambda);	*/
-	E = ((imbissinfo*) info)->K * 2500000 * imbiss->substrlen * explambda;
+	E = imbiss->K * 2500000 * imbiss->substrlen * explambda;
 	/*printf("E=Kmn * exp(-lambda*S): %19.16e\n", E);*/
 	printf("log(HSS): %f\n", log10(E));
 	printf("1-exp(-HSS): %19.16e\n", 1 - exp(-E));
 
-	printf("CSV;%d;%s;%d;", m->id, s[m->id]->url, m->count);
-	printf("%d;%f;%d;", match, m->score, m->count);
-	printf("%f;%f", m->swscore, m->blast);
-	printf("[%s];%s;", pic, s[m->id]->description);
+	printf("CSV;%d;%s;%d;", matchtype->id, s[matchtype->id]->url, matchtype->count);
+	printf("%d;%f;%d;", matchtype, matchtype->score, matchtype->count);
+	printf("%f;%f", matchtype->swscore, matchtype->blast);
+	printf("[%s];%s;", pic, s[matchtype->id]->description);
 	printf("\n");
 
 	FREEMEMORY(space, pic);
@@ -170,7 +169,9 @@ int main(int argc, char** argv) {
 	zlog_info(logger, "File str:\t%s", file_batch);
 	zlog_info(logger, "File sub:\t%s", file_sub);
 	zlog_info(logger, "Max:\t%d matches from suffix array", maximal_match);
+	zlog_info(logger, "Max:\t%d matches to rank", maxmatches);
 	zlog_info(logger, "Min:\t%d characters", minimal_length);
+	zlog_info(logger, "Min:\t%d seeds", minseeds);
 
 	imbissinfo *imbiss = ALLOCMEMORY(space, NULL, (*imbiss), 1);
 	imbiss->wurst = 0;

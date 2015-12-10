@@ -126,12 +126,11 @@ int allscores(void *space, Matchtype *m, IntSequence **s, Uint len, Uint match, 
  */
 
 int main(int argc, char** argv) {
-	Sint optindex, c;
 	unsigned char depictsw = 0;
 
 	Uint i, noofqueries = 0;
+	Uint maxmatches = 10000;
 	Uint minseeds = 5;
-	imbissinfo *imbiss;
 	void *space = NULL;
 
 	double *scores = NULL;
@@ -222,8 +221,8 @@ int main(int argc, char** argv) {
 		imbiss->substrlen = minimal_length;
 		imbiss->alphabet = alphabet;
 
-//		rankSufmatch(space, suffix_array, matches, (sequence->length - minimal_length), maxmatches, minimal_length,
-//				sequences, sequence_count, filter, select, handler, sequence, imbiss, scores, depictsw);
+		rankSufmatch(space, suffix_array, matches, (sequence->length - minimal_length), maxmatches, minimal_length,
+				sequences, sequence_count, filter, select, handler, sequence, imbiss, scores, depictsw);
 
 		destructSequence(space, sequence);
 

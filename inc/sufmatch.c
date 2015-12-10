@@ -392,8 +392,9 @@ double scorefilter(void *space, Matchtype *m, IntSequence *a, IntSequence *b, Ui
 
 	m->blast = m->blast > sum ? m->blast : sum;
 
-	imbiss->consensus[pos] += (Uint) 1
-	/*((double)imbiss->lambda*sum)*/;
+	if(imbiss->consensus != NULL) {
+		imbiss->consensus[pos] += (Uint) 1;
+	}
 
 	return sum > 0 ? sum : 0;
 }

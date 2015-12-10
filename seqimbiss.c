@@ -117,8 +117,8 @@ int allscores(void *space, Matchtype *m, IntSequence **s, Uint len, Uint match, 
 
 	printf("CSV;%d;%s;%d;", m->id, s[m->id]->url, m->count);
 	printf("%d;%f;%d;", match, m->score, m->count);
-	printf("[%s];%s;", pic, s[m->id]->description);
 	printf("%f;%f", m->swscore, m->blast);
+	printf("[%s];%s;", pic, s[m->id]->description);
 	printf("\n");
 
 	FREEMEMORY(space, pic);
@@ -210,7 +210,6 @@ int main(int argc, char** argv) {
 		char *inputfile = SETSTR(queries[i], 0);
 
 		IntSequence *sequence = sequence_aacid_load(space, inputfile);
-		sequence_dump_aacid(sequence);
 
 		time(&time_start);
 		PairSint *matches = sufSubstring(space, suffix_array, sequence->sequence, sequence->length, minimal_length);

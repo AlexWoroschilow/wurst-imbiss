@@ -455,12 +455,12 @@ void rankSufmatch(void *space, Suffixarray *suffix_array, PairSint *matches, Uin
 		IntSequence *sequence_a, void *info, double *scores, unsigned char depictsw)
 
 {
-
-	Matchtype *match, *selected = NULL;
+	Uint *ptr = NULL;
+	Matchtype *match = NULL;
+	Matchtype *selected = NULL;
+	int *hash_table = NULL;
 	int i = 0, j = 0, k = 0;
-	int *hash_table;
 	double t;
-	Uint *ptr;
 
 	hash_table = ALLOCMEMORY(space, NULL, int, (noofseqs + 1));
 	memset(hash_table, -1, sizeof(int) * (noofseqs + 1));
@@ -493,11 +493,13 @@ void rankSufmatch(void *space, Suffixarray *suffix_array, PairSint *matches, Uin
 
 			ptr = (suffix_array->suffixptr[suffix_array->suftab[j]]);
 			const IntSequence * sequence_b = sequences[match->id];
+
 			massert((info != NULL), "Info can not be null");
 			massert((sequence_a != NULL), "Sequence a can not be null");
 			massert((sequence_b != NULL), "Sequence b can not be null");
 			massert((match != NULL), "Match can not be null");
 			massert((ptr != NULL), "Ptr can not be null");
+
 			const int response = filter(space, match, sequence_a, sequence_b, ptr, substrlen, i, info);
 			if (response == -1) {
 				break;

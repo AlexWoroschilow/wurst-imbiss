@@ -224,7 +224,29 @@ void dumpSequence(IntSequence *s) {
 }
 
 void sequence_dump(IntSequence *s) {
-	return dumpSequence(s);
+	sequence_dump_salami(s);
+}
+
+void sequence_dump_salami(IntSequence *s) {
+	dumpSequence(s);
+}
+
+void sequence_dump_aacid(IntSequence *s) {
+	Uint i;
+	printf("sequence:\n");
+	for (i = 0; i < s->length; i++) {
+		printf("%c", s->sequence[i]);
+		if (i != (s->length - 1))
+			printf("-");
+	}
+	printf("\n");
+	printf("info:\n");
+	for (i = 0; i < s->length; i++) {
+		printf("%c", s->info[i]);
+		if (i != (s->length - 1))
+			printf("-");
+	}
+	printf("\n");
 }
 
 /*------------------------------- loadSequence -------------------------------
@@ -330,7 +352,7 @@ IntSequence* sequence_load_pdb(void *space, char *filename) {
 
 	massert((fclose(infile) != EOF), "couldn't close file");
 
-	sequence_dump(sequence);
+	sequence_dump_aacid(sequence);
 
 	return sequence;
 }

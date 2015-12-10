@@ -126,7 +126,8 @@ int allscores(void *space, Matchtype *m, IntSequence **s, Uint len, Uint match, 
  */
 
 int main(int argc, char** argv) {
-	unsigned char wurst = 0;
+	Sint optindex, c;
+	unsigned char depictsw = 0;
 
 	Uint i, noofqueries = 0;
 	Uint minseeds = 5;
@@ -143,29 +144,23 @@ int main(int argc, char** argv) {
 
 	Matchtype* (*select)(void *, Matchtype *, Uint k, IntSequence *, IntSequence **, void *) = selectSW;
 
-//	stringset_t *queryurl;
-	Suffixarray *suffix_array = NULL;
-	FAlphabet *alphabet = NULL;
-	PairSint *matches = NULL;
-
-///	time_t startsuf, endsuf;
-//	double difsuf, difmatch, difrank;
 
 	Config *cfg = NULL;
-	Uint maximal_match, minimal_length;
-	char file_batch[1024], file_sub[1024], file_abc[1024], file_seq[1024];
 	assert(ConfigReadFile("wurstimbiss.conf", &cfg) == CONFIG_OK);
+
+	char file_batch[1024], file_sub[1024], file_abc[1024], file_seq[1024];
 	ConfigReadString(cfg, "sources", "file_batch", file_batch, sizeof(file_batch), 0);
 	ConfigReadString(cfg, "sources", "file_sub", file_sub, sizeof(file_sub), 0);
 	ConfigReadString(cfg, "sources", "file_abc", file_abc, sizeof(file_abc), 0);
 	ConfigReadString(cfg, "sources", "file_seq", file_seq, sizeof(file_seq), 0);
+
+	Uint maximal_match, minimal_length;
 	ConfigReadUnsignedInt(cfg, "limits", "maximal_match", &maximal_match, 100);
 	ConfigReadUnsignedInt(cfg, "limits", "minimal_length", &minimal_length, 10);
 	ConfigFree(cfg);
 
-	zlog_category_t *logger;
 	assert(zlog_init("wurstimblog.conf") == CONFIG_OK);
-	logger = zlog_get_category("wurstimbiss");
+	zlog_category_t *logger = zlog_get_category("wurstimbiss");
 	zlog_info(logger, "File abc:\t%s", file_abc);
 	zlog_info(logger, "File seq:\t%s", file_seq);
 	zlog_info(logger, "File str:\t%s", file_batch);
@@ -173,17 +168,17 @@ int main(int argc, char** argv) {
 	zlog_info(logger, "Max:\t%d matches from suffix array", maximal_match);
 	zlog_info(logger, "Min:\t%d characters", minimal_length);
 
-	imbiss = ALLOCMEMORY(space, NULL, imbissinfo, 1);
+	imbissinfo *imbiss = ALLOCMEMORY(space, NULL, (*imbiss), 1);
+	imbiss->wurst = 0;
 	imbiss->reportfile = reportfile;
 	imbiss->swscores = swscores;
 	imbiss->noofhits = maximal_match;
 	imbiss->minseeds = minseeds;
-	imbiss->wurst = wurst;
 
 	time_t time_start, time_end;
 
 	zlog_debug(logger, "Load:\t%s", file_abc);
-	alphabet = alphabet_load_csv(space, file_abc);
+	FAlphabet *alphabet = alphabet_load_csv(space, file_abc);
 
 	Uint sequence_count = 0;
 	zlog_debug(logger, "Load:\t%s", file_seq);
@@ -195,7 +190,8 @@ int main(int argc, char** argv) {
 	zlog_debug(logger, "Time:\t pdb sequences loaded in %f sec", difftime(time_end, time_start));
 
 	time(&time_start);
-	suffix_array = suffix_array_init(space, sequences, sequence_count, NULL);
+	zlog_debug(logger, "Build:\t suffix array");
+	Suffixarray *suffix_array = suffix_array_init(space, sequences, sequence_count, NULL);
 	time(&time_end);
 
 	zlog_debug(logger, "Time:\t suffix array in %f sec", difftime(time_end, time_start));
@@ -211,13 +207,13 @@ int main(int argc, char** argv) {
 		sequence_dump_aacid(sequence);
 
 		time(&time_start);
-		matches = sufSubstring(space, suffix_array, sequence->sequence, sequence->length, minimal_length);
+		PairSint *matches = sufSubstring(space, suffix_array, sequence->sequence, sequence->length, minimal_length);
 		time(&time_end);
 
 		zlog_debug(logger, "Time:\t suffix array match in %f sec", difftime(time_end, time_start));
 
-		char *vector = scr_printf("/smallfiles/public/no_backup/bm/pdb_all_vec_6mer_struct/%5s.vec\0", sequence->url + 56);
 		char *binary = scr_printf("/smallfiles/public/no_backup/bm/pdb_all_bin/%5s.bin\0", sequence->url + 56);
+		char *vector = scr_printf("/smallfiles/public/no_backup/bm/pdb_all_vec_6mer_struct/%5s.vec\0", sequence->url + 56);
 
 		imbiss->query = initStringset(space);
 		addString(space, imbiss->query, binary, strlen(binary));

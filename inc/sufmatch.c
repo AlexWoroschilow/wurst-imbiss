@@ -373,9 +373,7 @@ double scorefilter(void *space, Matchtype *m, IntSequence *a, IntSequence *b, Ui
 	Uint l;
 	double temp = 0;
 	double sum = 0;
-	imbissinfo *imbiss;
-
-	imbiss = (imbissinfo*) info;
+	imbissinfo *imbiss = (imbissinfo*) info;
 
 	m->count++;
 	m->pos = ALLOCMEMORY(space, m->pos, Uint, m->count);
@@ -383,11 +381,13 @@ double scorefilter(void *space, Matchtype *m, IntSequence *a, IntSequence *b, Ui
 	m->pos[(m->count) - 1] = pos;
 	m->org[(m->count) - 1] = pos;
 
-	for (l = 0; l < len; l++) {
-		temp = ((imbissinfo*) info)->score[(Uint) *ptr];
-		sum += temp;
-		m->score += temp;
-		ptr++;
+	if (imbiss->score != NULL) {
+		for (l = 0; l < len; l++) {
+			temp = imbiss->score[*ptr];
+			sum += temp;
+			m->score += temp;
+			ptr++;
+		}
 	}
 
 	m->blast = m->blast > sum ? m->blast : sum;

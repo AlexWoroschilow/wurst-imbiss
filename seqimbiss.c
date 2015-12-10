@@ -68,22 +68,6 @@
 #include "lib/sort.h"
 #include "gnuplot_i.h"
 
-static int verbose_flag;
-
-static struct option long_options[] = {
-/* These options set a flag. */
-{ "verbose", no_argument, &verbose_flag, 1 }, { "brief", no_argument, &verbose_flag, 0 }, { "sequences",
-required_argument, 0, 's' }, { "query", required_argument, 0, 'q' }, { "matchlen", required_argument, 0, 'l' }, {
-		"minmatches", required_argument, 0, 'c' }, { "depictsw", no_argument, 0, 'd' },
-		{ "veggie", no_argument, 0, 'w' }, { "batchfile", required_argument, 0, 'b' }, { "percent", required_argument,
-				0, 'p' }, { "subfile", required_argument, 0, 'x' }, { "reportfile", required_argument, 0, 'r' }, {
-				"allscores",
-				no_argument, 0, 'S' }, { "segmentscore", no_argument, 0, 'B' }, { "allalign", no_argument, 0, 'A' }, {
-				"scorefilter", no_argument, 0, 'F' }, { "segfilter", no_argument, 0, 'G' }, { "match",
-		required_argument, 0, 'M' }, { "mismatch", required_argument, 0, 'D' }, { "latex", no_argument, 0, 'L' }, {
-				"maxmatches", required_argument, 0, 'm' }, { "help", no_argument, 0, 'h' }, { "gnuplot", no_argument, 0,
-				'g' }, { 0, 0, 0, 0 } };
-
 /*-------------------------------- allscores ---------------------------------
  *    
  * a handler function for ranked suffix matches
@@ -97,12 +81,12 @@ required_argument, 0, 's' }, { "query", required_argument, 0, 'q' }, { "matchlen
 
 int allscores(void *space, Matchtype *m, IntSequence **s, Uint len, Uint match, void *info) {
 	char *pic;
-	float rmsd = -1;
+	//float rmsd = -1;
 	double explambda, E;
-	FILE* fp;
+	//FILE* fp;
 	imbissinfo *imbiss;
-	struct salami_info *salami;
-	stringset_t *query;
+	//struct salami_info *salami;
+	//stringset_t *query;
 
 	imbiss = (imbissinfo*) info;
 	if (m->count <= imbiss->minseeds) {
@@ -142,17 +126,14 @@ int allscores(void *space, Matchtype *m, IntSequence **s, Uint len, Uint match, 
  */
 
 int main(int argc, char** argv) {
-	Sint optindex, c;
-	unsigned char depictsw = 0;
 	unsigned char wurst = 0;
 
 	Uint i, noofqueries = 0;
 	Uint minseeds = 5;
-	Uint maxmatches = 10000;
 	imbissinfo *imbiss;
 	void *space = NULL;
-	double *scores = NULL;
 
+	double *scores = NULL;
 	int swscores[2] = { 3, -2 };
 	char *reportfile = NULL;
 
@@ -162,13 +143,13 @@ int main(int argc, char** argv) {
 
 	Matchtype* (*select)(void *, Matchtype *, Uint k, IntSequence *, IntSequence **, void *) = selectSW;
 
-	stringset_t *queryurl;
+//	stringset_t *queryurl;
 	Suffixarray *suffix_array = NULL;
 	FAlphabet *alphabet = NULL;
 	PairSint *matches = NULL;
 
-	time_t startsuf, endsuf;
-	double difsuf, difmatch, difrank;
+///	time_t startsuf, endsuf;
+//	double difsuf, difmatch, difrank;
 
 	Config *cfg = NULL;
 	Uint maximal_match, minimal_length;
@@ -235,24 +216,18 @@ int main(int argc, char** argv) {
 
 		zlog_debug(logger, "Time:\t suffix array match in %f sec", difftime(time_end, time_start));
 
-		char *vector = malloc(sizeof(char) * 66);
-		sprintf(vector, "/smallfiles/public/no_backup/bm/pdb_all_vec_6mer_struct/%5s.vec\0", sequence->url + 56);
-		//char *vector = scr_printf("/smallfiles/public/no_backup/bm/pdb_all_vec_6mer_struct/%5s.vec\0", sequence->url + 56);
+		char *vector = scr_printf("/smallfiles/public/no_backup/bm/pdb_all_vec_6mer_struct/%5s.vec\0", sequence->url + 56);
+		char *binary = scr_printf("/smallfiles/public/no_backup/bm/pdb_all_bin/%5s.bin\0", sequence->url + 56);
 
-		char *binary = malloc(sizeof(char) * 54);
-		sprintf(binary, "/smallfiles/public/no_backup/bm/pdb_all_bin/%5s.bin\0", sequence->url + 56);
-		//char *binary = scr_printf("/smallfiles/public/no_backup/bm/pdb_all_bin/%5s.bin\0", sequence->url + 56);
+		imbiss->query = initStringset(space);
+		addString(space, imbiss->query, binary, strlen(binary));
+		addString(space, imbiss->query, vector, strlen(vector));
 
-		queryurl = initStringset(space);
-		addString(space, queryurl, binary, strlen(binary));
-		addString(space, queryurl, vector, strlen(vector));
-
-		imbiss->query = queryurl;
 		imbiss->substrlen = minimal_length;
 		imbiss->alphabet = alphabet;
 
-		rankSufmatch(space, suffix_array, matches, (sequence->length - minimal_length), maxmatches, minimal_length,
-				sequences, sequence_count, filter, select, handler, sequence, imbiss, scores, depictsw);
+//		rankSufmatch(space, suffix_array, matches, (sequence->length - minimal_length), maxmatches, minimal_length,
+//				sequences, sequence_count, filter, select, handler, sequence, imbiss, scores, depictsw);
 
 		destructSequence(space, sequence);
 

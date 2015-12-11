@@ -229,16 +229,6 @@ void salami_sequence_dump(struct salami_sequence * sequence) {
  *
  */
 
-void zero_shift_mat(struct score_mat *matrix, double shift) {
-	unsigned int i, j;
-	for (i = 0; i < 20; i++) {
-		for (j = i; j < 20; j++) {
-			float t = sub_mat_get_by_i(matrix, i, j) + shift;
-			sub_mat_set_by_i(matrix, i, j, t);
-		}
-	}
-}
-
 struct salami_info* alignment_aacid(void *space, Matchtype *match, IntSequence **s, int len, void *info) {
 	struct salami_info *salami = NULL;
 
@@ -255,14 +245,19 @@ struct salami_info* alignment_aacid(void *space, Matchtype *match, IntSequence *
 	struct coord *coord_b = coord_read(imbiss->strings[0].str);
 
 	struct seq *seq_a = coord_get_seq(coord_a);
+	massert((seq_a != NULL), 'Sequence A can not be empty');
+
 	struct seq *seq_b = coord_get_seq(coord_b);
+	massert((seq_b != NULL), 'Sequence B can not be empty');
 
 	struct score_mat *matrix_score = score_mat_new(seq_size(seq_a), seq_size(seq_b));
-	zero_shift_mat(matrix_score, zero_shift);
+	massert((matrix_score != NULL), 'Substitution matrix can not be empty');
+	score_mat_shift(matrix_score, zero_shift);
 
 	const char * matrix_substitition_file = "/home/stud2013/ovoroshylov/Clustering/wurst-imbiss/vendor/wurst/matrix/blosum62.mat";
 	struct score_mat *matrix_substitition = sub_mat_read(matrix_substitition_file);
 	massert((matrix_substitition != NULL), 'Substitution matrix can not be empty');
+
 	score_smat(matrix_score, seq_a, seq_b, matrix_substitition);
 
 	struct score_mat *crap = NULL;

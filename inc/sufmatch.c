@@ -452,7 +452,7 @@ void rankSufmatch(void *space, Suffixarray *suffix_array, PairSint *matches, Uin
 		IntSequence **sequences, Uint noofseqs,
 		double (*filter)(void *, Matchtype *, IntSequence *, IntSequence *, Uint *, Uint, Uint, void *), // filter callback
 		Matchtype* (*selector)(void *, Matchtype *, Uint, IntSequence *, IntSequence **, void *), // selector callback
-		int (*handler)(void *, Matchtype *, IntSequence **, Uint, Uint, void *), // handler callback
+		int (*handler)(void *, IntSequence *, Matchtype *, IntSequence **, Uint, Uint, void *), // handler callback
 		IntSequence *sequence_a, void *info, double *scores, unsigned char depictsw)
 
 {
@@ -515,7 +515,7 @@ void rankSufmatch(void *space, Suffixarray *suffix_array, PairSint *matches, Uin
 	int response = 0;
 	for (i = k; i > 0; i--) {
 		const Matchtype * match = &selected[i - 1];
-		if ((response = handler(space, match, sequences, len, length, info))) {
+		if ((response = handler(space, sequence_a, match, sequences, len, length, info))) {
 			length++;
 		}
 		if (response == -1) {

@@ -79,7 +79,7 @@
  * 
  */
 
-int allscores(void *space, Matchtype *matchtype, IntSequence **s, Uint len, Uint match, void *info) {
+int allscores(void *space, IntSequence *sequence_a, Matchtype *matchtype, IntSequence **s, Uint len, Uint match, void *info) {
 	char *pic;
 	//float rmsd = -1;
 	//double explambda, E;
@@ -95,9 +95,13 @@ int allscores(void *space, Matchtype *matchtype, IntSequence **s, Uint len, Uint
 		return -1;
 	}
 
+	IntSequence *sequence_b = s[matchtype->id];
+
+
+
 	/*report score stuff*/
 	printf("[%d]: score: %f, count: %d\n", match, matchtype->score, matchtype->count);
-	printf("%d\t%s\t%d\t", matchtype->id, s[matchtype->id]->url, matchtype->count);
+	printf("%d\t%s\t%d\t", matchtype->id, sequence_b->url, matchtype->count);
 	pic = depictSequence(space, len, 20, matchtype->pos, matchtype->count, '*');
 	printf("[%s]\n", pic);
 	printf("%s\n", s[matchtype->id]->description);
@@ -117,7 +121,7 @@ int allscores(void *space, Matchtype *matchtype, IntSequence **s, Uint len, Uint
 	/*printf("E=Kmn * exp(-lambda*S): %19.16e\n", E);*/
 	//printf("log(HSS): %f\n", log10(E));
 	//printf("1-exp(-HSS): %19.16e\n", 1 - exp(-E));
-	printf("CSV;[%s];%d;", pic, matchtype->count);
+	printf("CSV;[%s]%s;%s;%d;", pic, sequence_code(sequence_a->url), sequence_code(sequence_b->url), matchtype->count);
 	printf("%d;%f;%d;", matchtype, matchtype->score, matchtype->count);
 	printf("%f;%f;", matchtype->swscore, matchtype->blast);
 
@@ -130,7 +134,7 @@ int allscores(void *space, Matchtype *matchtype, IntSequence **s, Uint len, Uint
 	//	salami->andrew_scr);
 	//printf("tm_scr %f\n", salami->tmscore);
 
-	printf("%d;%s;%s;", matchtype->id, s[matchtype->id]->url, s[matchtype->id]->description);
+	printf("%d;%s;", matchtype->id, sequence_b->description);
 	printf("\n");
 
 	FREEMEMORY(space, pic);
@@ -154,7 +158,7 @@ int main(int argc, char** argv) {
 	int swscores[2] = { 3, -2 };
 	char *reportfile = NULL;
 
-	int (*handler)(void *, Matchtype *, IntSequence **, Uint, Uint, void *) = allscores;
+	int (*handler)(void *, IntSequence *, Matchtype *, IntSequence **, Uint, Uint, void *) = allscores;
 
 	double (*filter)(void *, Matchtype *, IntSequence *, IntSequence *, Uint *, Uint, Uint, void *) = swconstfilter;
 
@@ -237,8 +241,8 @@ int main(int argc, char** argv) {
 
 		zlog_debug(logger, "Time:\t suffix array match in %f sec", difftime(time_end, time_start));
 
-		char *vector = merge(merge(merge((const char *) path_vector, "/"), sequence_code(sequence->url)), ".vec");
-		char *binary = merge(merge(merge((const char *) path_binary, "/"), sequence_code(sequence->url)), ".bin");
+		char *vector = merge(merge(merge(path_vector, "/"), sequence_code(sequence->url)), ".vec");
+		char *binary = merge(merge(merge(path_binary, "/"), sequence_code(sequence->url)), ".bin");
 
 		imbiss->query = initStringset(space);
 		addString(space, imbiss->query, binary, strlen(binary));

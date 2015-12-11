@@ -148,7 +148,6 @@ int main(int argc, char** argv) {
 
 	Uint i, noofqueries = 0;
 	Uint maxmatches = 10000;
-	Uint minseeds = 3;
 	void *space = NULL;
 
 	double *scores = NULL;
@@ -170,9 +169,11 @@ int main(int argc, char** argv) {
 	ConfigReadString(cfg, "sources", "file_abc", file_abc, sizeof(file_abc), 0);
 	ConfigReadString(cfg, "sources", "file_seq", file_seq, sizeof(file_seq), 0);
 
-	Uint maximal_match, minimal_length;
+	Uint maximal_match, minimal_seed, minimal_length;
 	ConfigReadUnsignedInt(cfg, "limits", "maximal_match", &maximal_match, 100);
+	ConfigReadUnsignedInt(cfg, "limits", "minimal_seed", &minimal_seed, 4);
 	ConfigReadUnsignedInt(cfg, "limits", "minimal_length", &minimal_length, 10);
+
 	ConfigFree(cfg);
 
 	assert(zlog_init("wurstimblog.conf") == CONFIG_OK);
@@ -184,7 +185,7 @@ int main(int argc, char** argv) {
 	zlog_info(logger, "Max:\t%d matches from suffix array", maximal_match);
 	zlog_info(logger, "Max:\t%d matches to rank", maxmatches);
 	zlog_info(logger, "Min:\t%d characters", minimal_length);
-	zlog_info(logger, "Min:\t%d seeds", minseeds);
+	zlog_info(logger, "Min:\t%d seeds", minimal_seed);
 
 	imbissinfo *imbiss = ALLOCMEMORY(space, NULL, (*imbiss), 1);
 	imbiss->wurst = 0;
@@ -193,7 +194,7 @@ int main(int argc, char** argv) {
 	imbiss->reportfile = reportfile;
 	imbiss->swscores = swscores;
 	imbiss->noofhits = maximal_match;
-	imbiss->minseeds = minseeds;
+	imbiss->minseeds = minimal_seed;
 
 	time_t time_start, time_end;
 

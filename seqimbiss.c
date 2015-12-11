@@ -228,14 +228,11 @@ int main(int argc, char** argv) {
 
 		zlog_debug(logger, "Time:\t suffix array match in %f sec", difftime(time_end, time_start));
 
-		//char *vector = malloc(sizeof(char) * 66);
-		//sprintf(vector, "/smallfiles/public/no_backup/bm/pdb_all_vec_6mer_struct/%5s.vec\0", sequence->url + 56);
-		//char *binary = malloc(sizeof(char) * 54);
-		//sprintf(binary, "/smallfiles/public/no_backup/bm/pdb_all_bin/%5s.bin\0", sequence->url + 56);
+		char *vector = malloc(sizeof(char) * 66);
+		sprintf(vector, "/smallfiles/public/no_backup/bm/pdb_all_vec_6mer_struct/%5s.vec\0", sequence->url + 56);
+		char *binary = malloc(sizeof(char) * 54);
+		sprintf(binary, "/smallfiles/public/no_backup/bm/pdb_all_bin/%5s.bin\0", sequence->url + 56);
 
-		char *binary = scr_printf("/smallfiles/public/no_backup/bm/pdb_all_bin/%5s.bin", sequence->url + 56);
-		char *vector = scr_printf("/smallfiles/public/no_backup/bm/pdb_all_vec_6mer_struct/%5s.vec",
-				sequence->url + 56);
 
 		imbiss->query = initStringset(space);
 		addString(space, imbiss->query, binary, strlen(binary));

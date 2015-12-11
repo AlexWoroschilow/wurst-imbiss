@@ -57,6 +57,7 @@ char* concatdelim(void *spacetab, char* strA, char* strB, int lenA, int lenB, ch
 char* strreverse(char*, Uint);
 char* my_itoa(int, char*, Uint);
 char * attachext (void *, char *, Uint, char *, Uint);
+char * merge(const char * string1, const char * string2);
 
 #endif
 

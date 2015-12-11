@@ -230,13 +230,14 @@ void salami_sequence_dump(struct salami_sequence * sequence) {
  */
 
 struct salami_info* alignment_aacid(void *space, Matchtype *match, IntSequence **s, int len, void *info) {
-	struct salami_info *salami = NULL;
 
 	double zero_shift = 0.79;
 	double gap_open = 8.94;
 	double gap_widen = 0.88;
 
 	stringset_t* imbiss = (stringset_t*) info;
+	struct salami_info *salami = malloc(sizeof(*salami));
+
 
 	char *binary = malloc(1024);
 	sprintf(binary, "/smallfiles/public/no_backup/bm/pdb_all_bin/%5s.bin\0", s[match->id]->url + 56);
@@ -267,7 +268,7 @@ struct salami_info* alignment_aacid(void *space, Matchtype *match, IntSequence *
 	unsigned id = get_seq_id_simple(pair_set_nw, seq_a, seq_b);
 	struct score_struct *scores = get_scores(space, pair_set_nw, coord_a, coord_b, NULL);
 
-	salami->id = (float) id / pair_set_nw->n;
+	salami->id = (float) (id / pair_set_nw->n);
 	salami->nw_score = pair_set_nw->score;
 	salami->nw_smpl_score = pair_set_nw->smpl_score;
 	salami->nw_score_tot = scores->scr_tot;

@@ -409,12 +409,12 @@ double swconstfilter(void *space, Matchtype *match, IntSequence *a, IntSequence 
 	imbiss = (imbissinfo*) info;
 	t = scorefilter(space, match, a, b, ptr, len, pos, info);
 
-	if (match->count == imbiss->minseeds) {
+	//if (match->count == imbiss->minseeds) {
 		swres = swgapless(space, a->sequence, a->length, b->sequence, b->length, constscr, imbiss->swscores);
 		match->swscore = swres[arraymax(swres, (a->length + 1) * (b->length + 1))];
 
 		FREEMEMORY(space, swres);
-	}
+	//}
 
 	return t;
 }

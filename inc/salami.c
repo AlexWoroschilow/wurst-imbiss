@@ -257,7 +257,8 @@ struct salami_info* alignment_aacid(void *space, Matchtype *match, IntSequence *
 
 	struct score_mat *matrix_score = score_mat_new(seq_size(seq_a), seq_size(seq_b));
 	massert((matrix_score != NULL), "Substitution matrix can not be empty");
-	score_mat_shift(matrix_score, zero_shift);
+	struct score_mat *matrix_unknown = score_mat_shift(matrix_score, zero_shift);
+	score_mat_destroy(matrix_unknown);
 
 	// TODO: replace to path from configuration file
 	const char * matrix_substitition_file ="/home/stud2013/ovoroshylov/Clustering/wurst-imbiss/vendor/wurst/matrix/blosum62.mat";

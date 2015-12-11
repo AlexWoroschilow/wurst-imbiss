@@ -82,7 +82,7 @@
 int allscores(void *space, Matchtype *matchtype, IntSequence **s, Uint len, Uint match, void *info) {
 	char *pic;
 	//float rmsd = -1;
-	double explambda, E;
+	//double explambda, E;
 	//FILE* fp;
 	imbissinfo *imbiss = (imbissinfo*) info;
 	//struct salami_info *salami;
@@ -107,12 +107,12 @@ int allscores(void *space, Matchtype *matchtype, IntSequence **s, Uint len, Uint
 	/*report blast stuff*/
 	printf("highest seed score (HSS): %f\n", matchtype->blast);
 	/*printf("lambda*S %19.16e\n", m->blast *((imbissinfo*)info)->lambda);*/
-	explambda = exp(-imbiss->lambda * matchtype->blast);
+	//explambda = exp(-imbiss->lambda * matchtype->blast);
 	/*printf("exp(-lambda*S): %19.16e\n", explambda);	*/
-	E = imbiss->K * 2500000 * imbiss->substrlen * explambda;
+	//E = imbiss->K * 2500000 * imbiss->substrlen * explambda;
 	/*printf("E=Kmn * exp(-lambda*S): %19.16e\n", E);*/
-	printf("log(HSS): %f\n", log10(E));
-	printf("1-exp(-HSS): %19.16e\n", 1 - exp(-E));
+	//printf("log(HSS): %f\n", log10(E));
+	//printf("1-exp(-HSS): %19.16e\n", 1 - exp(-E));
 
 	printf("CSV;%d;%s;%d;", matchtype->id, s[matchtype->id]->url, matchtype->count);
 	printf("%d;%f;%d;", matchtype, matchtype->score, matchtype->count);

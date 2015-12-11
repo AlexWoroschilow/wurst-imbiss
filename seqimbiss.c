@@ -117,7 +117,7 @@ int allscores(void *space, Matchtype *matchtype, IntSequence **s, Uint len, Uint
 	/*printf("E=Kmn * exp(-lambda*S): %19.16e\n", E);*/
 	//printf("log(HSS): %f\n", log10(E));
 	//printf("1-exp(-HSS): %19.16e\n", 1 - exp(-E));
-	printf("CSV;%d;%s;%d;", matchtype->id, s[matchtype->id]->url, matchtype->count);
+	printf("CSV;[%s];%d;", pic, matchtype->count);
 	printf("%d;%f;%d;", matchtype, matchtype->score, matchtype->count);
 	printf("%f;%f;", matchtype->swscore, matchtype->blast);
 
@@ -130,7 +130,7 @@ int allscores(void *space, Matchtype *matchtype, IntSequence **s, Uint len, Uint
 		//	salami->andrew_scr);
 	//printf("tm_scr %f\n", salami->tmscore);
 
-	printf("[%s];%s;", pic, s[matchtype->id]->description);
+	printf("%d;%s;%s;", matchtype->id, s[matchtype->id]->url, s[matchtype->id]->description);
 	printf("\n");
 
 	FREEMEMORY(space, pic);
@@ -231,9 +231,9 @@ int main(int argc, char** argv) {
 
 		zlog_debug(logger, "Time:\t suffix array match in %f sec", difftime(time_end, time_start));
 
-		char *vector = malloc(sizeof(char) * 66);
+		char *vector = malloc(1024);
 		sprintf(vector, "/smallfiles/public/no_backup/bm/pdb_all_vec_6mer_struct/%5s.vec\0", sequence->url + 56);
-		char *binary = malloc(sizeof(char) * 54);
+		char *binary = malloc(1024);
 		sprintf(binary, "/smallfiles/public/no_backup/bm/pdb_all_bin/%5s.bin\0", sequence->url + 56);
 
 		imbiss->query = initStringset(space);

@@ -248,7 +248,8 @@ struct salami_info* alignment_aacid(void *space, Matchtype *match, IntSequence *
 
 	stringset_t* imbiss = (stringset_t*) info;
 
-	char *binary = scr_printf("/smallfiles/public/no_backup/bm/pdb_all_bin/%5s.bin\0", s[match->id]->url + 56);
+	char *binary = malloc(1024);
+	sprintf(binary, "/smallfiles/public/no_backup/bm/pdb_all_bin/%5s.bin\0", s[match->id]->url + 56);
 
 	struct coord *coord_a = coord_read(binary);
 	struct coord *coord_b = coord_read(imbiss->strings[0].str);
@@ -259,7 +260,7 @@ struct salami_info* alignment_aacid(void *space, Matchtype *match, IntSequence *
 	struct score_mat *matrix_score = score_mat_new(seq_size(seq_a), seq_size(seq_b));
 	zero_shift_mat(matrix_score, zero_shift);
 
-	const char * matrix_substitition_file = "./wurst/matrix/blosum62.mat";
+	const char * matrix_substitition_file = "./vendor/wurst/matrix/blosum62.mat";
 	struct score_mat *matrix_substitition = sub_mat_read(matrix_substitition_file);
 	score_smat(matrix_score, seq_a, seq_b, matrix_substitition);
 

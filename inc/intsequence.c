@@ -223,7 +223,6 @@ void dumpSequence(IntSequence *s) {
 	printf("\n");
 }
 
-
 /*------------------------------- loadSequence -------------------------------
  *  loads a sequence from a file.   
  * 
@@ -270,7 +269,6 @@ IntSequence* loadSequence(void *space, char *filename) {
 
 	return s;
 }
-
 
 /*------------------------------- saveSequence -------------------------------
  *
@@ -427,6 +425,19 @@ Uint * sequence_salami_to_uint(struct salami_sequence * sequence) {
 		sequence_uint[i] = (Uint) sequence->sequence[i];
 	}
 	return sequence_uint;
+}
+
+
+char * sequence_code(char *url) {
+	int i;
+	char * response;
+	Uint length = (strlen(url) - 1);
+	for (i = length; i >= 0; i--) {
+		if (url[i - 1] == '/') {
+			break;
+		}
+	}
+	return strdup((const char *) url + i);
 }
 
 IntSequence* sequence_aacid_load(void *space, char *filename) {

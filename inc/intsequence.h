@@ -38,6 +38,15 @@ char * printAlignment(void *, int *, Uint, IntSequence *, IntSequence *, Uint);
 IntSequence** createSequenceHash(void *, Uint);
 
 /**
+ * Get sequence code from given url,
+ * for example if you have something like that:
+ * "/smallfiles/public/no_backup/bm/pdb_all_vec_6mer_struct/3cmvA"
+ * only last part "3cmvA" will be returned
+ *
+ */
+char * sequence_code(char *url);
+
+/**
  * Convert sequence to printable format
  */
 char * sequence_print(void *space, IntSequence *s, Uint cols);

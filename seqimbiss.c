@@ -121,13 +121,13 @@ int allscores(void *space, Matchtype *matchtype, IntSequence **s, Uint len, Uint
 	printf("%d;%f;%d;", matchtype, matchtype->score, matchtype->count);
 	printf("%f;%f;", matchtype->swscore, matchtype->blast);
 
-
-	printf("%f;%f;%f;%f;%f;%d;", salami->id, salami->sw_score, salami->sw_smpl_score, salami->sw_score_tot, salami->sw_cvr, salami->sw_raw);
+	printf("%f;%f;%f;%f;%f;%d;", salami->id, salami->sw_score, salami->sw_smpl_score, salami->sw_score_tot,
+			salami->sw_cvr, salami->sw_raw);
 	//printf("scr: %f (%f), scr_tot: %f, cvr: %f (raw: %d)\n", salami->sw_score, salami->sw_smpl_score,
 	//	salami->sw_score_tot, salami->sw_cvr, salami->sw_raw);
 	printf("%f;%f;%f;%f;%f;", salami->frac_dme, salami->z_scr, salami->rmsd, salami->andrew_scr, salami->tmscore);
 	//printf("frac_dme: %f, z_scr: %f, rmsd: %f, andrew_scr %f\n", salami->frac_dme, salami->z_scr, salami->rmsd,
-		//	salami->andrew_scr);
+	//	salami->andrew_scr);
 	//printf("tm_scr %f\n", salami->tmscore);
 
 	printf("%d;%s;%s;", matchtype->id, s[matchtype->id]->url, s[matchtype->id]->description);
@@ -163,11 +163,13 @@ int main(int argc, char** argv) {
 	Config *cfg = NULL;
 	assert(ConfigReadFile("wurstimbiss.conf", &cfg) == CONFIG_OK);
 
-	char file_batch[1024], file_sub[1024], file_abc[1024], file_seq[1024];
+	char file_batch[1024], file_sub[1024], file_abc[1024], file_seq[1024], path_binary[1024], path_vector[1024];
 	ConfigReadString(cfg, "sources", "file_batch", file_batch, sizeof(file_batch), 0);
 	ConfigReadString(cfg, "sources", "file_sub", file_sub, sizeof(file_sub), 0);
 	ConfigReadString(cfg, "sources", "file_abc", file_abc, sizeof(file_abc), 0);
 	ConfigReadString(cfg, "sources", "file_seq", file_seq, sizeof(file_seq), 0);
+	ConfigReadString(cfg, "sources", "path_binary", path_binary, sizeof(path_binary), 0);
+	ConfigReadString(cfg, "sources", "path_vector", path_vector, sizeof(path_vector), 0);
 
 	Uint maximal_match, minimal_seed, minimal_length;
 	ConfigReadUnsignedInt(cfg, "limits", "maximal_match", &maximal_match, 100);
@@ -206,6 +208,7 @@ int main(int argc, char** argv) {
 
 	time(&time_start);
 	IntSequence **sequences = sequence_load_csv(space, file_seq, "", &sequence_count, sequence_aacid_load);
+	massert((sequences != NULL), "Sequence collection can not be empty");
 	time(&time_end);
 
 	zlog_debug(logger, "Time:\t pdb sequences loaded in %f sec", difftime(time_end, time_start));
@@ -213,6 +216,8 @@ int main(int argc, char** argv) {
 	time(&time_start);
 	zlog_debug(logger, "Build:\t suffix array");
 	Suffixarray *suffix_array = suffix_array_init(space, sequences, sequence_count, NULL);
+	massert((suffix_array != NULL), "Suffix array can not be empty");
+
 	time(&time_end);
 
 	zlog_debug(logger, "Time:\t suffix array in %f sec", difftime(time_end, time_start));
@@ -232,10 +237,8 @@ int main(int argc, char** argv) {
 
 		zlog_debug(logger, "Time:\t suffix array match in %f sec", difftime(time_end, time_start));
 
-		char *vector = malloc(1024);
-		sprintf(vector, "/smallfiles/public/no_backup/bm/pdb_all_vec_6mer_struct/%5s.vec\0", sequence->url + 56);
-		char *binary = malloc(1024);
-		sprintf(binary, "/smallfiles/public/no_backup/bm/pdb_all_bin/%5s.bin\0", sequence->url + 56);
+		char *vector = merge(merge(merge((const char *) path_vector, "/"), sequence_code(sequence->url)), ".vec");
+		char *binary = merge(merge(merge((const char *) path_binary, "/"), sequence_code(sequence->url)), ".bin");
 
 		imbiss->query = initStringset(space);
 		addString(space, imbiss->query, binary, strlen(binary));
@@ -244,8 +247,11 @@ int main(int argc, char** argv) {
 		imbiss->substrlen = minimal_length;
 		imbiss->alphabet = alphabet;
 
-		rankSufmatch(space, suffix_array, matches, (sequence->length - minimal_length), maxmatches, minimal_length,
-				sequences, sequence_count, filter, select, handler, sequence, imbiss, scores, depictsw);
+		Uint matches_count = (sequence->length - minimal_length);
+		zlog_debug(logger, "Count:\t %u matches found", matches_count);
+
+		rankSufmatch(space, suffix_array, matches, matches_count, maxmatches, minimal_length, sequences, sequence_count,
+				filter, select, handler, sequence, imbiss, scores, depictsw);
 
 		destructSequence(space, sequence);
 

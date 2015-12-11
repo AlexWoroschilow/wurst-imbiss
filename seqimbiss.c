@@ -121,15 +121,15 @@ int allscores(void *space, IntSequence *sequence_a, Matchtype *matchtype, IntSeq
 	/*printf("E=Kmn * exp(-lambda*S): %19.16e\n", E);*/
 	//printf("log(HSS): %f\n", log10(E));
 	//printf("1-exp(-HSS): %19.16e\n", 1 - exp(-E));
-	printf("CSV;[%s]%s;%s;%d;", pic, sequence_code(sequence_a->url), sequence_code(sequence_b->url), matchtype->count);
-	printf("%d;%f;%d;", matchtype, matchtype->score, matchtype->count);
+	printf("CSV;[%s]%s;%s;%f;%f", pic, sequence_code(sequence_a->url), sequence_code(sequence_b->url), salami->tmscore, salami->andrew_scr);
+	printf("%d;%d;%f;%d;", matchtype->count, matchtype, matchtype->score, matchtype->count);
 	printf("%f;%f;", matchtype->swscore, matchtype->blast);
 
 	printf("%f;%f;%f;%f;%f;%d;", salami->id, salami->sw_score, salami->sw_smpl_score, salami->sw_score_tot,
 			salami->sw_cvr, salami->sw_raw);
 	//printf("scr: %f (%f), scr_tot: %f, cvr: %f (raw: %d)\n", salami->sw_score, salami->sw_smpl_score,
 	//	salami->sw_score_tot, salami->sw_cvr, salami->sw_raw);
-	printf("%f;%f;%f;%f;%f;", salami->frac_dme, salami->z_scr, salami->rmsd, salami->andrew_scr, salami->tmscore);
+	printf("%f;%f;%f;", salami->frac_dme, salami->z_scr, salami->rmsd);
 	//printf("frac_dme: %f, z_scr: %f, rmsd: %f, andrew_scr %f\n", salami->frac_dme, salami->z_scr, salami->rmsd,
 	//	salami->andrew_scr);
 	//printf("tm_scr %f\n", salami->tmscore);

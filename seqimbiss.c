@@ -106,6 +106,10 @@ int allscores(void *space, Matchtype *matchtype, IntSequence **s, Uint len, Uint
 
 	/*report blast stuff*/
 	printf("highest seed score (HSS): %f\n", matchtype->blast);
+
+	struct salami_info *salami = alignment_aacid(space, matchtype, s, len, imbiss->query);
+	massert((salami != NULL), "Salami alignment object can not be null");
+
 	/*printf("lambda*S %19.16e\n", m->blast *((imbissinfo*)info)->lambda);*/
 	//explambda = exp(-imbiss->lambda * matchtype->blast);
 	/*printf("exp(-lambda*S): %19.16e\n", explambda);	*/
@@ -113,21 +117,20 @@ int allscores(void *space, Matchtype *matchtype, IntSequence **s, Uint len, Uint
 	/*printf("E=Kmn * exp(-lambda*S): %19.16e\n", E);*/
 	//printf("log(HSS): %f\n", log10(E));
 	//printf("1-exp(-HSS): %19.16e\n", 1 - exp(-E));
-
 	printf("CSV;%d;%s;%d;", matchtype->id, s[matchtype->id]->url, matchtype->count);
 	printf("%d;%f;%d;", matchtype, matchtype->score, matchtype->count);
-	printf("%f;%f", matchtype->swscore, matchtype->blast);
+	printf("%f;%f;", matchtype->swscore, matchtype->blast);
+
+
+	printf("%f;%f;%f;%f;%f;%d;", salami->id, salami->sw_score, salami->sw_smpl_score, salami->sw_score_tot, salami->sw_cvr, salami->sw_raw);
+	//printf("scr: %f (%f), scr_tot: %f, cvr: %f (raw: %d)\n", salami->sw_score, salami->sw_smpl_score,
+	//	salami->sw_score_tot, salami->sw_cvr, salami->sw_raw);
+	printf("%f;%f;%f;%f;%f;", salami->frac_dme, salami->z_scr, salami->rmsd, salami->andrew_scr, salami->tmscore);
+	//printf("frac_dme: %f, z_scr: %f, rmsd: %f, andrew_scr %f\n", salami->frac_dme, salami->z_scr, salami->rmsd,
+		//	salami->andrew_scr);
+	//printf("tm_scr %f\n", salami->tmscore);
+
 	printf("[%s];%s;", pic, s[matchtype->id]->description);
-
-	struct salami_info *salami = alignment_aacid(space, matchtype, s, len, imbiss->query);
-	massert((salami != NULL), "Salami alignment object can not be null");
-	printf("sequence identity: %f\n", salami->id);
-	printf("scr: %f (%f), scr_tot: %f, cvr: %f (raw: %d)\n", salami->sw_score, salami->sw_smpl_score,
-			salami->sw_score_tot, salami->sw_cvr, salami->sw_raw);
-	printf("frac_dme: %f, z_scr: %f, rmsd: %f, andrew_scr %f\n", salami->frac_dme, salami->z_scr, salami->rmsd,
-			salami->andrew_scr);
-	printf("tm_scr %f\n", salami->tmscore);
-
 	printf("\n");
 
 	FREEMEMORY(space, pic);
@@ -232,7 +235,6 @@ int main(int argc, char** argv) {
 		sprintf(vector, "/smallfiles/public/no_backup/bm/pdb_all_vec_6mer_struct/%5s.vec\0", sequence->url + 56);
 		char *binary = malloc(sizeof(char) * 54);
 		sprintf(binary, "/smallfiles/public/no_backup/bm/pdb_all_bin/%5s.bin\0", sequence->url + 56);
-
 
 		imbiss->query = initStringset(space);
 		addString(space, imbiss->query, binary, strlen(binary));

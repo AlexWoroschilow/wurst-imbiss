@@ -237,27 +237,32 @@ struct salami_info* alignment_aacid(void *space, Matchtype *match, IntSequence *
 
 	stringset_t* imbiss = (stringset_t*) info;
 	struct salami_info *salami = malloc(sizeof(*salami));
+	massert((salami != NULL), "Can not allocate memory for salami object");
 
-
+	// TODO: replace to path from configuration file
 	char *binary = malloc(1024);
 	sprintf(binary, "/smallfiles/public/no_backup/bm/pdb_all_bin/%5s.bin\0", s[match->id]->url + 56);
 
 	struct coord *coord_a = coord_read(binary);
 	struct coord *coord_b = coord_read(imbiss->strings[0].str);
 
-	struct seq *seq_a = coord_get_seq(coord_a);
-	massert((seq_a != NULL), 'Sequence A can not be empty');
+	massert((coord_a != NULL), "Coordinates for sequence A can not be empty");
+	massert((coord_b != NULL), "Coordinates for sequence B can not be empty");
 
+	struct seq *seq_a = coord_get_seq(coord_a);
 	struct seq *seq_b = coord_get_seq(coord_b);
-	massert((seq_b != NULL), 'Sequence B can not be empty');
+
+	massert((seq_a != NULL), "Sequence A can not be empty");
+	massert((seq_b != NULL), "Sequence B can not be empty");
 
 	struct score_mat *matrix_score = score_mat_new(seq_size(seq_a), seq_size(seq_b));
-	massert((matrix_score != NULL), 'Substitution matrix can not be empty');
+	massert((matrix_score != NULL), "Substitution matrix can not be empty");
 	score_mat_shift(matrix_score, zero_shift);
 
-	const char * matrix_substitition_file = "/home/stud2013/ovoroshylov/Clustering/wurst-imbiss/vendor/wurst/matrix/blosum62.mat";
+	// TODO: replace to path from configuration file
+	const char * matrix_substitition_file ="/home/stud2013/ovoroshylov/Clustering/wurst-imbiss/vendor/wurst/matrix/blosum62.mat";
 	struct score_mat *matrix_substitition = sub_mat_read(matrix_substitition_file);
-	massert((matrix_substitition != NULL), 'Substitution matrix can not be empty');
+	massert((matrix_substitition != NULL), "Substitution matrix can not be empty");
 
 	score_smat(matrix_score, seq_a, seq_b, matrix_substitition);
 

@@ -264,7 +264,7 @@ struct salami_info* alignment_aacid(void *space, Matchtype *match, IntSequence *
 	struct pair_set *pair_set_nw = score_mat_sum_full(&crap, matrix_score, gap_open, gap_widen, gap_open, gap_widen,
 	NULL, NULL, S_AND_W, NULL);
 
-	unsigned int id = get_seq_id_simple(pair_set_nw, seq_a, seq_b);
+	unsigned id = get_seq_id_simple(pair_set_nw, seq_a, seq_b);
 	struct score_struct *scores = get_scores(space, pair_set_nw, coord_a, coord_b, NULL);
 
 	salami->id = (float) id / pair_set_nw->n;

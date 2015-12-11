@@ -260,8 +260,9 @@ struct salami_info* alignment_aacid(void *space, Matchtype *match, IntSequence *
 	struct score_mat *matrix_score = score_mat_new(seq_size(seq_a), seq_size(seq_b));
 	zero_shift_mat(matrix_score, zero_shift);
 
-	const char * matrix_substitition_file = "./vendor/wurst/matrix/blosum62.mat";
+	const char * matrix_substitition_file = "/home/stud2013/ovoroshylov/Clustering/wurst-imbiss/vendor/wurst/matrix/blosum62.mat";
 	struct score_mat *matrix_substitition = sub_mat_read(matrix_substitition_file);
+	massert((matrix_substitition != NULL), 'Substitution matrix can not be empty');
 	score_smat(matrix_score, seq_a, seq_b, matrix_substitition);
 
 	struct score_mat *crap = NULL;

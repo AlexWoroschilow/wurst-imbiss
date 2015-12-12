@@ -110,7 +110,7 @@ const char * allscores_string(char * picture, IntSequence *sequence_a, IntSequen
 	return (const char *) response;
 }
 
-/*-------------------------------- allscores ---------------------------------
+/*
  *
  * a handler function for ranked suffix matches
  * accepts pointer to the set of sequences, pointer to to ranked matches
@@ -124,10 +124,10 @@ int allscores(void *space, IntSequence *sequence_a, Matchtype *matchtype, IntSeq
 		void *info) {
 	imbissinfo *imbiss = (imbissinfo*) info;
 
-	if (matchtype->count <= imbiss->minseeds) {
+	if (matchtype->count <= imbiss->minimal_seed) {
 		return 0;
 	}
-	if (match > imbiss->noofhits) {
+	if (match > imbiss->maximal_hit) {
 		return -1;
 	}
 
@@ -145,11 +145,6 @@ int allscores(void *space, IntSequence *sequence_a, Matchtype *matchtype, IntSeq
 	return 1;
 }
 
-/*----------------------------------- main -----------------------------------
- *    
- *  main function
- * 
- */
 
 int main(int argc, char** argv) {
 	unsigned char depictsw = 0;
@@ -185,7 +180,6 @@ int main(int argc, char** argv) {
 
 	assert(zlog_init("wurstimblog.conf") == CONFIG_OK);
 	zlog_category_t *logger = zlog_get_category("wurstimbiss");
-	massert((logger != NULL), "Logger object can not be null");
 	zlog_info(logger, "File abc:\t%s", imbiss->file_alphabet);
 	zlog_info(logger, "File seq:\t%s", imbiss->file_sequences);
 	zlog_info(logger, "File str:\t%s", imbiss->file_batch);
@@ -194,22 +188,20 @@ int main(int argc, char** argv) {
 	zlog_info(logger, "Min:\t%d characters", imbiss->minimal_length);
 	zlog_info(logger, "Min:\t%d seeds", imbiss->minimal_seed);
 
-	imbiss->swscores = swscores;
-	imbiss->noofhits = imbiss->maximal_hit;
-	imbiss->minseeds = imbiss->minimal_seed;
-
 	time_t time_start, time_end;
 
 	zlog_debug(logger, "Load:\t%s", imbiss->file_alphabet);
 	FAlphabet *alphabet = alphabet_load_csv(space, imbiss->file_alphabet);
 	massert((alphabet != NULL), "Alphabet object can not be null");
 
+	imbiss->swscores = swscores;
+	imbiss->alphabet = alphabet;
+
 	Uint sequence_count = 0;
 	zlog_debug(logger, "Load:\t%s", imbiss->file_sequences);
 
 	time(&time_start);
-	IntSequence **sequences = sequence_load_csv(space, imbiss->file_sequences, "", &sequence_count,
-			sequence_aacid_load);
+	IntSequence **sequences = sequence_load_csv(space, imbiss->file_sequences, "", &sequence_count, sequence_aacid_load);
 	massert((sequences != NULL), "Sequence collection can not be empty");
 	time(&time_end);
 
@@ -250,9 +242,6 @@ int main(int argc, char** argv) {
 		imbiss->query = initStringset(space);
 		addString(space, imbiss->query, binary, strlen(binary));
 		addString(space, imbiss->query, vector, strlen(vector));
-
-		imbiss->substrlen = imbiss->minimal_length;
-		imbiss->alphabet = alphabet;
 
 		Uint matches_count = (sequence->length - imbiss->minimal_length);
 		zlog_debug(logger, "Count:\t %u matches found", matches_count);

@@ -6,7 +6,9 @@
  *	wurstimbiss.h
  *  basic declarations
  * 
- *  @author Steve Hoffmann, shoffmann@zbh.uni-hamburg.de
+ *  @author Steve Hoffmann, shoffmann@zbh.uni-hamburg.de,
+ *  @author Alex Woroschilow alex.woroschilow@gmail.com
+ *
  *  @company Center for Bioinformatics, Hamburg 
  *  @date 03/25/07 01:24:22 CET  
  *
@@ -45,8 +47,6 @@ typedef struct {
 	unsigned char depictsw;
 
 	Uint substrlen;
-	Uint noofhits;
-	Uint minseeds;
 	Uint *sortind;
 
 	FAlphabet *alphabet;

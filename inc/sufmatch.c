@@ -302,7 +302,7 @@ Matchtype* selectBlastScoreSWconst(void *space, Matchtype *m, Uint k, IntSequenc
 
 	l = 0;
 	for (i = k; i > 0 && l < 1000; i--) {
-		if (m[i - 1].count >= imbiss->minseeds) {
+		if (m[i - 1].count >= imbiss->minimal_seed) {
 
 			swres = swgapless(space, a->sequence, a->length, s[m[i - 1].id]->sequence, s[m[i - 1].id]->length, constscr,
 					imbiss->swscores
@@ -334,7 +334,7 @@ Matchtype* selectScoreSWconst(void *space, Matchtype *m, Uint k, IntSequence *a,
 
 	l = 0;
 	for (i = k; i > 0 && l < 1000; i--) {
-		if (m[i - 1].count >= imbiss->minseeds) {
+		if (m[i - 1].count >= imbiss->minimal_seed) {
 
 			swres = swgapless(space, a->sequence, a->length, s[m[i - 1].id]->sequence, s[m[i - 1].id]->length, constscr,
 					imbiss->swscores
@@ -409,7 +409,7 @@ double swconstfilter(void *space, Matchtype *match, IntSequence *a, IntSequence 
 	imbiss = (imbissinfo*) info;
 	t = scorefilter(space, match, a, b, ptr, len, pos, info);
 
-	//if (match->count == imbiss->minseeds) {
+	//if (match->count == imbiss->minimal_seed) {
 	swres = swgapless(space, a->sequence, a->length, b->sequence, b->length, constscr, imbiss->swscores);
 	match->swscore = swres[arraymax(swres, (a->length + 1) * (b->length + 1))];
 

@@ -392,7 +392,7 @@ double scorefilter(void *space, Matchtype *m, IntSequence *a, IntSequence *b, Ui
 
 	m->blast = m->blast > sum ? m->blast : sum;
 
-	if(imbiss->consensus != NULL) {
+	if (imbiss->consensus != NULL) {
 		imbiss->consensus[pos] += (Uint) 1;
 	}
 
@@ -410,10 +410,10 @@ double swconstfilter(void *space, Matchtype *match, IntSequence *a, IntSequence 
 	t = scorefilter(space, match, a, b, ptr, len, pos, info);
 
 	//if (match->count == imbiss->minseeds) {
-		swres = swgapless(space, a->sequence, a->length, b->sequence, b->length, constscr, imbiss->swscores);
-		match->swscore = swres[arraymax(swres, (a->length + 1) * (b->length + 1))];
+	swres = swgapless(space, a->sequence, a->length, b->sequence, b->length, constscr, imbiss->swscores);
+	match->swscore = swres[arraymax(swres, (a->length + 1) * (b->length + 1))];
 
-		FREEMEMORY(space, swres);
+	FREEMEMORY(space, swres);
 	//}
 
 	return t;
@@ -448,8 +448,8 @@ void initMatchtype(Matchtype *m, Uint id) {
  * 
  */
 
-void rankSufmatch(void *space, Suffixarray *suffix_array, PairSint *matches, Uint len, Uint maxmatches, Uint substrlen,
-		IntSequence **sequences, Uint noofseqs,
+void rankSufmatch(void *space, Suffixarray *suffix_array, PairSint *matches, Uint len, //
+		Uint maxmatches, Uint substrlen, IntSequence **sequences, Uint noofseqs, //
 		double (*filter)(void *, Matchtype *, IntSequence *, IntSequence *, Uint *, Uint, Uint, void *), // filter callback
 		Matchtype* (*selector)(void *, Matchtype *, Uint, IntSequence *, IntSequence **, void *), // selector callback
 		int (*handler)(void *, IntSequence *, Matchtype *, IntSequence **, Uint, Uint, void *), // handler callback

@@ -92,7 +92,7 @@ const char * allscores_string(char * picture, IntSequence *sequence_a, IntSequen
 	const char * sequence_a_code = sequence_code(sequence_a->url);
 	const char * sequence_b_code = sequence_code(sequence_b->url);
 
-	int strlen = snprintf(NULL, 0, "CSV;[%s]%s;%s;%f;%f;%u;%f;%f;%f;%f;%f;%f;%f;%f;%u;%f;%f;%f;%u;%s", picture,
+	int strlen = snprintf(NULL, 0, "[%s]%s;%s;%f;%f;%u;%f;%f;%f;%f;%f;%f;%f;%f;%u;%f;%f;%f;%u;%s", picture,
 			sequence_a_code, sequence_b_code, salami->tmscore, salami->andrew_scr, matchtype->count, matchtype->score,
 			matchtype->swscore, matchtype->blast, salami->id, salami->sw_score, salami->sw_smpl_score,
 			salami->sw_score_tot, salami->sw_cvr, salami->sw_raw, salami->frac_dme, salami->z_scr, salami->rmsd,
@@ -101,7 +101,7 @@ const char * allscores_string(char * picture, IntSequence *sequence_a, IntSequen
 	response = malloc((strlen + 1) * sizeof(*response));
 	massert((response!=NULL), "Can not allocate memory for out string");
 
-	snprintf(response, (strlen + 1), "CSV;[%s]%s;%s;%f;%f;%u;%f;%f;%f;%f;%f;%f;%f;%f;%u;%f;%f;%f;%u;%s", picture,
+	snprintf(response, (strlen + 1), "[%s]%s;%s;%f;%f;%u;%f;%f;%f;%f;%f;%f;%f;%f;%u;%f;%f;%f;%u;%s", picture,
 			sequence_a_code, sequence_b_code, salami->tmscore, salami->andrew_scr, matchtype->count, matchtype->score,
 			matchtype->swscore, matchtype->blast, salami->id, salami->sw_score, salami->sw_smpl_score,
 			salami->sw_score_tot, salami->sw_cvr, salami->sw_raw, salami->frac_dme, salami->z_scr, salami->rmsd,
@@ -128,11 +128,9 @@ int allscores(void *space, IntSequence *sequence_a, Matchtype *matchtype, IntSeq
 	struct salami_info *salami = alignment_aacid(space, matchtype, s, len, imbiss->query);
 	massert((salami != NULL), "Salami alignment object can not be null");
 
-	char *response = allscores_string(picture, sequence_a, sequence_b, matchtype, salami);
-	printf("CSV;%s\n", response);
+	printf("CSV;%s\n", allscores_string(picture, sequence_a, sequence_b, matchtype, salami));
 
 	FREEMEMORY(space, picture);
-	FREEMEMORY(space, response);
 	return 1;
 }
 
@@ -224,9 +222,7 @@ int main(int argc, char** argv) {
 	/*do search*/
 	stringset_t ** queries = readcsv(space, file_batch, "", &noofqueries);
 
-	const char *header_csv = allscores_string(NULL, NULL, NULL, NULL, NULL);
-	zlog_info(logger, "CSV;%s", header_csv);
-	free(header_csv);
+	zlog_info(logger, "CSV;%s", allscores_string(NULL, NULL, NULL, NULL, NULL));
 	for (i = 0; i < noofqueries; i++) {
 
 		/*get query form batchfile*/

@@ -152,22 +152,24 @@ int main(int argc, char** argv) {
 	Uint i, noofqueries = 0;
 	void *space = NULL;
 
+	Config *cfg = NULL;
 	double *scores = NULL;
 	int swscores[2] = { 3, -2 };
+	time_t time_start, time_end;
 
 	imbissinfo *imbiss = ALLOCMEMORY(space, NULL, (*imbiss), 1);
 	massert((imbiss != NULL), "Imbissinfo object can not be null");
 
+	imbiss->swscores = swscores;
 	imbiss->handler = (imbissinfo_handler *) allscores;
 	imbiss->filter = (imbissinfo_filter *) swconstfilter;
 	imbiss->select = (imbissinfo_select *) selectSW;
 
-	Config *cfg = NULL;
 	assert(ConfigReadFile("wurstimbiss.conf", &cfg) == CONFIG_OK);
 	ConfigReadString(cfg, "sources", "file_batch", imbiss->file_batch, sizeof(imbiss->file_batch), 0);
-	ConfigReadString(cfg, "sources", "file_sub", imbiss->file_substitution, sizeof(imbiss->file_substitution), 0);
-	ConfigReadString(cfg, "sources", "file_abc", imbiss->file_alphabet, sizeof(imbiss->file_alphabet), 0);
-	ConfigReadString(cfg, "sources", "file_seq", imbiss->file_sequences, sizeof(imbiss->file_sequences), 0);
+	ConfigReadString(cfg, "sources", "file_substitution", imbiss->file_substitution, sizeof(imbiss->file_substitution), 0);
+	ConfigReadString(cfg, "sources", "file_alphabet", imbiss->file_alphabet, sizeof(imbiss->file_alphabet), 0);
+	ConfigReadString(cfg, "sources", "file_sequences", imbiss->file_sequences, sizeof(imbiss->file_sequences), 0);
 	ConfigReadString(cfg, "sources", "path_binary", imbiss->path_binary, sizeof(imbiss->path_binary), 0);
 	ConfigReadString(cfg, "sources", "path_vector", imbiss->path_vector, sizeof(imbiss->path_vector), 0);
 
@@ -188,14 +190,11 @@ int main(int argc, char** argv) {
 	zlog_info(logger, "Min:\t%d characters", imbiss->minimal_length);
 	zlog_info(logger, "Min:\t%d seeds", imbiss->minimal_seed);
 
-	time_t time_start, time_end;
 
 	zlog_debug(logger, "Load:\t%s", imbiss->file_alphabet);
-	FAlphabet *alphabet = alphabet_load_csv(space, imbiss->file_alphabet);
-	massert((alphabet != NULL), "Alphabet object can not be null");
+	imbiss->alphabet = alphabet_load_csv(space, imbiss->file_alphabet);
+	massert((imbiss->alphabet != NULL), "Alphabet object can not be null");
 
-	imbiss->swscores = swscores;
-	imbiss->alphabet = alphabet;
 
 	Uint sequence_count = 0;
 	zlog_debug(logger, "Load:\t%s", imbiss->file_sequences);

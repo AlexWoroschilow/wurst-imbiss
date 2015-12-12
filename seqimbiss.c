@@ -205,8 +205,6 @@ int main(int argc, char** argv) {
 	Uint sequence_count = 0;
 	zlog_debug(logger, "Load:\t%s", file_seq);
 
-	zlog_info(logger, "CSV;%s", allscores_string(NULL, NULL, NULL, NULL, NULL));
-
 	time(&time_start);
 	IntSequence **sequences = sequence_load_csv(space, file_seq, "", &sequence_count, sequence_aacid_load);
 	massert((sequences != NULL), "Sequence collection can not be empty");
@@ -225,6 +223,10 @@ int main(int argc, char** argv) {
 
 	/*do search*/
 	stringset_t ** queries = readcsv(space, file_batch, "", &noofqueries);
+
+	const char *header_csv = allscores_string(NULL, NULL, NULL, NULL, NULL);
+	zlog_info(logger, "CSV;%s", header_csv);
+	free(header_csv);
 	for (i = 0; i < noofqueries; i++) {
 
 		/*get query form batchfile*/

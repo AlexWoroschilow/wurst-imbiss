@@ -223,7 +223,7 @@ int main(int argc, char** argv) {
 	/*do search*/
 	stringset_t ** queries = readcsv(space, file_batch, "", &noofqueries);
 
-	printf("CSV;%s", allscores_string(NULL, NULL, NULL, NULL, NULL));
+	printf("CSV;%s\n", allscores_string(NULL, NULL, NULL, NULL, NULL));
 	for (i = 0; i < noofqueries; i++) {
 
 		/*get query form batchfile*/

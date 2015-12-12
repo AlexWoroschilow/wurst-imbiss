@@ -155,7 +155,6 @@ int main(int argc, char** argv) {
 	unsigned char depictsw = 0;
 
 	Uint i, noofqueries = 0;
-	Uint maxmatches = 10000;
 	void *space = NULL;
 
 	double *scores = NULL;
@@ -177,7 +176,8 @@ int main(int argc, char** argv) {
 	ConfigReadString(cfg, "sources", "path_binary", imbiss->path_binary, sizeof(imbiss->path_binary), 0);
 	ConfigReadString(cfg, "sources", "path_vector", imbiss->path_vector, sizeof(imbiss->path_vector), 0);
 
-	ConfigReadUnsignedInt(cfg, "limits", "maximal_match", &imbiss->maximal_match, 100);
+	ConfigReadUnsignedInt(cfg, "limits", "maximal_hit", &imbiss->maximal_hit, 10000);
+	ConfigReadUnsignedInt(cfg, "limits", "maximal_match", &imbiss->maximal_match, 50);
 	ConfigReadUnsignedInt(cfg, "limits", "minimal_seed", &imbiss->minimal_seed, 4);
 	ConfigReadUnsignedInt(cfg, "limits", "minimal_length", &imbiss->minimal_length, 10);
 
@@ -191,12 +191,11 @@ int main(int argc, char** argv) {
 	zlog_info(logger, "File str:\t%s", imbiss->file_batch);
 	zlog_info(logger, "File sub:\t%s", imbiss->file_substitution);
 	zlog_info(logger, "Max:\t%d matches from suffix array", imbiss->maximal_match);
-	zlog_info(logger, "Max:\t%d matches to rank", maxmatches);
 	zlog_info(logger, "Min:\t%d characters", imbiss->minimal_length);
 	zlog_info(logger, "Min:\t%d seeds", imbiss->minimal_seed);
 
 	imbiss->swscores = swscores;
-	imbiss->noofhits = imbiss->maximal_match;
+	imbiss->noofhits = imbiss->maximal_hit;
 	imbiss->minseeds = imbiss->minimal_seed;
 
 	time_t time_start, time_end;
@@ -258,7 +257,7 @@ int main(int argc, char** argv) {
 		Uint matches_count = (sequence->length - imbiss->minimal_length);
 		zlog_debug(logger, "Count:\t %u matches found", matches_count);
 
-		rankSufmatch(space, suffix_array, matches, matches_count, maxmatches, imbiss->minimal_length, sequences,
+		rankSufmatch(space, suffix_array, matches, matches_count, imbiss->maximal_match, imbiss->minimal_length, sequences,
 				sequence_count, imbiss->filter, imbiss->select, imbiss->handler, sequence, imbiss, scores, depictsw);
 
 		destructSequence(space, sequence);

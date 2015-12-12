@@ -60,6 +60,7 @@ typedef struct {
 	imbissinfo_filter * filter;
 	imbissinfo_select * select;
 
+	Uint maximal_hit;
 	Uint maximal_match;
 	Uint minimal_seed;
 	Uint minimal_length;

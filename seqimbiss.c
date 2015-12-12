@@ -79,14 +79,39 @@
  * 
  */
 
+const char * allscores_string(char * picture, IntSequence *sequence_a, IntSequence *sequence_b, Matchtype *matchtype,
+		struct salami_info *salami) {
+	char * response;
+
+	if (picture == NULL && sequence_a == NULL && sequence_b == NULL && matchtype == NULL && salami == NULL) {
+		return "picture;sequence a;sequence b;tm_score;andrew_score;matches;matches_score;matches_swscore;"
+				"matches_blast;salami_id;salami_sw_score;salami_sw_smpl_score;salami_sw_score_tot;salami_sw_cvr;"
+				"salami_sw_raw;salami_frac_dme;salami_z_scr;salami_rmsd;matchtype_id;description;";
+	}
+
+	const char * sequence_a_code = sequence_code(sequence_a->url);
+	const char * sequence_b_code = sequence_code(sequence_b->url);
+
+	int strlen = snprintf(NULL, 0, "CSV;[%s]%s;%s;%f;%f;%u;%f;%f;%f;%f;%f;%f;%f;%f;%u;%f;%f;%f;%u;%s", picture,
+			sequence_a_code, sequence_b_code, salami->tmscore, salami->andrew_scr, matchtype->count, matchtype->score,
+			matchtype->swscore, matchtype->blast, salami->id, salami->sw_score, salami->sw_smpl_score,
+			salami->sw_score_tot, salami->sw_cvr, salami->sw_raw, salami->frac_dme, salami->z_scr, salami->rmsd,
+			matchtype->id, sequence_b->description);
+
+	response = malloc((strlen + 1) * sizeof(*response));
+	massert((response!=NULL), "Can not allocate memory for out string");
+
+	snprintf(response, (strlen + 1), "CSV;[%s]%s;%s;%f;%f;%u;%f;%f;%f;%f;%f;%f;%f;%f;%u;%f;%f;%f;%u;%s", picture,
+			sequence_a_code, sequence_b_code, salami->tmscore, salami->andrew_scr, matchtype->count, matchtype->score,
+			matchtype->swscore, matchtype->blast, salami->id, salami->sw_score, salami->sw_smpl_score,
+			salami->sw_score_tot, salami->sw_cvr, salami->sw_raw, salami->frac_dme, salami->z_scr, salami->rmsd,
+			matchtype->id, sequence_b->description);
+
+	return (const char *) response;
+}
+
 int allscores(void *space, IntSequence *sequence_a, Matchtype *matchtype, IntSequence **s, Uint len, Uint match, void *info) {
-	char *pic;
-	//float rmsd = -1;
-	//double explambda, E;
-	//FILE* fp;
 	imbissinfo *imbiss = (imbissinfo*) info;
-	//struct salami_info *salami;
-	//stringset_t *query;
 
 	if (matchtype->count <= imbiss->minseeds) {
 		return 0;
@@ -97,47 +122,17 @@ int allscores(void *space, IntSequence *sequence_a, Matchtype *matchtype, IntSeq
 
 	IntSequence *sequence_b = s[matchtype->id];
 
-
-
-	/*report score stuff*/
-	printf("[%d]: score: %f, count: %d\n", match, matchtype->score, matchtype->count);
-	printf("%d\t%s\t%d\t", matchtype->id, sequence_b->url, matchtype->count);
-	pic = depictSequence(space, len, 20, matchtype->pos, matchtype->count, '*');
-	printf("[%s]\n", pic);
-	printf("%s\n", s[matchtype->id]->description);
-
-	printf("gapless sw score: %f\n", matchtype->swscore);
-
-	/*report blast stuff*/
-	printf("highest seed score (HSS): %f\n", matchtype->blast);
+	char *picture = depictSequence(space, len, 20, matchtype->pos, matchtype->count, '*');
+	massert((picture != NULL), "Picture object can not be null");
 
 	struct salami_info *salami = alignment_aacid(space, matchtype, s, len, imbiss->query);
 	massert((salami != NULL), "Salami alignment object can not be null");
 
-	/*printf("lambda*S %19.16e\n", m->blast *((imbissinfo*)info)->lambda);*/
-	//explambda = exp(-imbiss->lambda * matchtype->blast);
-	/*printf("exp(-lambda*S): %19.16e\n", explambda);	*/
-	//E = imbiss->K * 2500000 * imbiss->substrlen * explambda;
-	/*printf("E=Kmn * exp(-lambda*S): %19.16e\n", E);*/
-	//printf("log(HSS): %f\n", log10(E));
-	//printf("1-exp(-HSS): %19.16e\n", 1 - exp(-E));
-	printf("CSV;[%s]%s;%s;%f;%f", pic, sequence_code(sequence_a->url), sequence_code(sequence_b->url), salami->tmscore, salami->andrew_scr);
-	printf("%d;%d;%f;%d;", matchtype->count, matchtype, matchtype->score, matchtype->count);
-	printf("%f;%f;", matchtype->swscore, matchtype->blast);
+	char *response = allscores_string(picture, sequence_a, sequence_b, matchtype, salami);
+	printf("CSV;%s\n", response);
 
-	printf("%f;%f;%f;%f;%f;%d;", salami->id, salami->sw_score, salami->sw_smpl_score, salami->sw_score_tot,
-			salami->sw_cvr, salami->sw_raw);
-	//printf("scr: %f (%f), scr_tot: %f, cvr: %f (raw: %d)\n", salami->sw_score, salami->sw_smpl_score,
-	//	salami->sw_score_tot, salami->sw_cvr, salami->sw_raw);
-	printf("%f;%f;%f;", salami->frac_dme, salami->z_scr, salami->rmsd);
-	//printf("frac_dme: %f, z_scr: %f, rmsd: %f, andrew_scr %f\n", salami->frac_dme, salami->z_scr, salami->rmsd,
-	//	salami->andrew_scr);
-	//printf("tm_scr %f\n", salami->tmscore);
-
-	printf("%d;%s;", matchtype->id, sequence_b->description);
-	printf("\n");
-
-	FREEMEMORY(space, pic);
+	FREEMEMORY(space, picture);
+	FREEMEMORY(space, response);
 	return 1;
 }
 
@@ -209,6 +204,8 @@ int main(int argc, char** argv) {
 
 	Uint sequence_count = 0;
 	zlog_debug(logger, "Load:\t%s", file_seq);
+
+	zlog_info(logger, "CSV;%s", allscores_string(NULL, NULL, NULL, NULL, NULL));
 
 	time(&time_start);
 	IntSequence **sequences = sequence_load_csv(space, file_seq, "", &sequence_count, sequence_aacid_load);

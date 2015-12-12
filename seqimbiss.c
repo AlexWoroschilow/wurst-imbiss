@@ -110,7 +110,8 @@ const char * allscores_string(char * picture, IntSequence *sequence_a, IntSequen
 	return (const char *) response;
 }
 
-int allscores(void *space, IntSequence *sequence_a, Matchtype *matchtype, IntSequence **s, Uint len, Uint match, void *info) {
+int allscores(void *space, IntSequence *sequence_a, Matchtype *matchtype, IntSequence **s, Uint len, Uint match,
+		void *info) {
 	imbissinfo *imbiss = (imbissinfo*) info;
 
 	if (matchtype->count <= imbiss->minseeds) {
@@ -222,7 +223,7 @@ int main(int argc, char** argv) {
 	/*do search*/
 	stringset_t ** queries = readcsv(space, file_batch, "", &noofqueries);
 
-	zlog_info(logger, "CSV;%s", allscores_string(NULL, NULL, NULL, NULL, NULL));
+	printf("CSV;%s", allscores_string(NULL, NULL, NULL, NULL, NULL));
 	for (i = 0; i < noofqueries; i++) {
 
 		/*get query form batchfile*/

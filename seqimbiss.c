@@ -136,7 +136,7 @@ int allscores(void *space, IntSequence *sequence_a, Matchtype *matchtype, IntSeq
 	char *picture = depictSequence(space, len, 20, matchtype->pos, matchtype->count, '*');
 	massert((picture != NULL), "Picture object can not be null");
 
-	struct salami_info *salami = alignment_aacid(space, matchtype, sequences, len, imbiss->query);
+	struct salami_info *salami = alignment_aacid(info, space, matchtype, sequences, len, imbiss->query);
 	massert((salami != NULL), "Salami alignment object can not be null");
 
 	printf("CSV;%s\n", allscores_string(picture, sequence_a, sequence_b, matchtype, salami));
@@ -144,7 +144,6 @@ int allscores(void *space, IntSequence *sequence_a, Matchtype *matchtype, IntSeq
 	FREEMEMORY(space, picture);
 	return 1;
 }
-
 
 int main(int argc, char** argv) {
 	unsigned char depictsw = 0;
@@ -161,6 +160,7 @@ int main(int argc, char** argv) {
 	massert((imbiss != NULL), "Imbissinfo object can not be null");
 
 	imbiss->score = NULL;
+	imbiss->matrix_substitition = NULL;
 	imbiss->consensus = NULL;
 	imbiss->swscores = swscores;
 	imbiss->handler = (imbissinfo_handler *) allscores;
@@ -169,7 +169,8 @@ int main(int argc, char** argv) {
 
 	assert(ConfigReadFile("wurstimbiss.conf", &cfg) == CONFIG_OK);
 	ConfigReadString(cfg, "sources", "file_batch", imbiss->file_batch, sizeof(imbiss->file_batch), 0);
-	ConfigReadString(cfg, "sources", "file_substitution", imbiss->file_substitution, sizeof(imbiss->file_substitution), 0);
+	ConfigReadString(cfg, "sources", "file_substitution", imbiss->file_substitution, sizeof(imbiss->file_substitution),
+			0);
 	ConfigReadString(cfg, "sources", "file_alphabet", imbiss->file_alphabet, sizeof(imbiss->file_alphabet), 0);
 	ConfigReadString(cfg, "sources", "file_sequences", imbiss->file_sequences, sizeof(imbiss->file_sequences), 0);
 	ConfigReadString(cfg, "sources", "path_binary", imbiss->path_binary, sizeof(imbiss->path_binary), 0);
@@ -179,8 +180,10 @@ int main(int argc, char** argv) {
 	ConfigReadUnsignedInt(cfg, "limits", "maximal_match", &imbiss->maximal_match, 50);
 	ConfigReadUnsignedInt(cfg, "limits", "minimal_seed", &imbiss->minimal_seed, 4);
 	ConfigReadUnsignedInt(cfg, "limits", "minimal_length", &imbiss->minimal_length, 10);
-
 	ConfigFree(cfg);
+
+	imbiss->matrix_substitition = sub_mat_read(imbiss->file_substitution);
+	massert((imbiss->matrix_substitition != NULL), "Substitution matrix can not be empty");
 
 	assert(zlog_init("wurstimblog.conf") == CONFIG_OK);
 	zlog_category_t *logger = zlog_get_category("wurstimbiss");
@@ -192,17 +195,16 @@ int main(int argc, char** argv) {
 	zlog_info(logger, "Min:\t%d characters", imbiss->minimal_length);
 	zlog_info(logger, "Min:\t%d seeds", imbiss->minimal_seed);
 
-
 	zlog_debug(logger, "Load:\t%s", imbiss->file_alphabet);
 	imbiss->alphabet = alphabet_load_csv(space, imbiss->file_alphabet);
 	massert((imbiss->alphabet != NULL), "Alphabet object can not be null");
-
 
 	Uint sequence_count = 0;
 	zlog_debug(logger, "Load:\t%s", imbiss->file_sequences);
 
 	time(&time_start);
-	IntSequence **sequences = sequence_load_csv(imbiss, space, imbiss->file_sequences, "", &sequence_count, sequence_aacid_load);
+	IntSequence **sequences = sequence_load_csv(imbiss, space, imbiss->file_sequences, "", &sequence_count,
+			sequence_aacid_load);
 	massert((sequences != NULL), "Sequence collection can not be empty");
 	time(&time_end);
 
@@ -247,8 +249,9 @@ int main(int argc, char** argv) {
 		Uint matches_count = (sequence->length - imbiss->minimal_length);
 		zlog_debug(logger, "Count:\t %u matches found", matches_count);
 
-		rankSufmatch(space, suffix_array, matches, matches_count, imbiss->maximal_match, imbiss->minimal_length, sequences,
-				sequence_count, imbiss->filter, imbiss->select, imbiss->handler, sequence, imbiss, scores, depictsw);
+		rankSufmatch(space, suffix_array, matches, matches_count, imbiss->maximal_match, imbiss->minimal_length,
+				sequences, sequence_count, imbiss->filter, imbiss->select, imbiss->handler, sequence, imbiss, scores,
+				depictsw);
 
 		destructSequence(space, sequence);
 

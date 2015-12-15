@@ -209,6 +209,7 @@ struct salami_sequence * salami_sequence_string(void *imbiss, IntSequence *seque
 	response->length = sequence_wurst->length;
 	response->sequence = seq_print(sequence_wurst);
 
+	free(binary);
 	coord_destroy(coordinates);
 	seq_destroy(sequence_wurst);
 
@@ -231,22 +232,23 @@ void salami_sequence_dump(struct salami_sequence * sequence) {
  *
  */
 
-struct salami_info* alignment_aacid(void *space, Matchtype *match, IntSequence **s, int len, void *info) {
+struct salami_info* alignment_aacid(void *config, void *space, Matchtype *match, IntSequence **s, int len, void *info) {
 
 	double zero_shift = 0.79;
 	double gap_open = 8.94;
 	double gap_widen = 0.88;
 
-	stringset_t* imbiss = (stringset_t*) info;
+	imbissinfo *imbiss = (imbissinfo*) config;
+	massert((imbiss != NULL), "Imbiss info object can not be empty");
+
+	stringset_t* imbiss_info = (stringset_t*) info;
 	struct salami_info *salami = malloc(sizeof(*salami));
 	massert((salami != NULL), "Can not allocate memory for salami object");
 
-	// TODO: replace to path from configuration file
-	char *binary = malloc(1024);
-	sprintf(binary, "/smallfiles/public/no_backup/bm/pdb_all_bin/%5s.bin\0", s[match->id]->url + 56);
+	char *binary = merge(merge(merge(imbiss->path_binary, "/"), sequence_code(s[match->id]->url)), ".bin");
 
 	struct coord *coord_a = coord_read(binary);
-	struct coord *coord_b = coord_read(imbiss->strings[0].str);
+	struct coord *coord_b = coord_read(imbiss_info->strings[0].str);
 
 	massert((coord_a != NULL), "Coordinates for sequence A can not be empty");
 	massert((coord_b != NULL), "Coordinates for sequence B can not be empty");
@@ -262,13 +264,7 @@ struct salami_info* alignment_aacid(void *space, Matchtype *match, IntSequence *
 	struct score_mat *matrix_unknown = score_mat_shift(matrix_score, zero_shift);
 	score_mat_destroy(matrix_unknown);
 
-	// TODO: replace to path from configuration file
-	const char * matrix_substitition_file =
-			"/home/stud2013/ovoroshylov/Clustering/wurst-imbiss/vendor/wurst/matrix/blosum62.mat";
-	struct score_mat *matrix_substitition = sub_mat_read(matrix_substitition_file);
-	massert((matrix_substitition != NULL), "Substitution matrix can not be empty");
-
-	score_smat(matrix_score, seq_a, seq_b, matrix_substitition);
+	score_smat(matrix_score, seq_a, seq_b, imbiss->matrix_substitition);
 
 	struct score_mat *crap = NULL;
 	struct pair_set *pair_set_nw = score_mat_sum_full(&crap, matrix_score, gap_open, gap_widen, gap_open, gap_widen,

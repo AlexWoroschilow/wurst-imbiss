@@ -40,6 +40,6 @@ doWurstAlignment(void *space, Matchtype *m, IntSequence **s, int len, void *info
 
 struct salami_sequence * salami_sequence_string(void *imbiss, IntSequence *sequence);
 void salami_sequence_dump(struct salami_sequence * sequence);
-struct salami_info* alignment_aacid(void *space, Matchtype *match, IntSequence **s, int len, void *info);
+struct salami_info* alignment_aacid(void *imbiss, void *space, Matchtype *match, IntSequence **s, int len, void *info);
 
 #endif

@@ -27,6 +27,7 @@
 #include "intsequence.h"
 #include "sufmatch.h"
 #include "massert.h"
+#include "score_mat.h"
 
 typedef int (*imbissinfo_handler)(void *, IntSequence *, Matchtype *, IntSequence **, Uint, Uint, void *);
 typedef double (*imbissinfo_filter)(void *, Matchtype *, IntSequence *, IntSequence *, Uint *, Uint, Uint, void *);
@@ -52,6 +53,7 @@ typedef struct {
 	FAlphabet *alphabet;
 	stringset_t *query;
 	Uint *consensus;
+	struct score_mat * matrix_substitition;
 
 	double lambda;
 	double H;

@@ -160,6 +160,8 @@ int main(int argc, char** argv) {
 	imbissinfo *imbiss = ALLOCMEMORY(space, NULL, (*imbiss), 1);
 	massert((imbiss != NULL), "Imbissinfo object can not be null");
 
+	imbiss->score = NULL;
+	imbiss->consensus = NULL;
 	imbiss->swscores = swscores;
 	imbiss->handler = (imbissinfo_handler *) allscores;
 	imbiss->filter = (imbissinfo_filter *) swconstfilter;

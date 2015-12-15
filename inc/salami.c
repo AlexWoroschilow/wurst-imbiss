@@ -193,6 +193,7 @@ get_scores(void *space, struct pair_set *set, struct coord *a, struct coord *b, 
 struct salami_sequence * salami_sequence_string(void *imbiss, IntSequence *sequence) {
 
 	imbissinfo *imbissinfo = imbiss;
+	massert((imbiss != NULL), "Imbiss info object can not be empty");
 
 	char *binary = merge(merge(merge(imbissinfo->path_binary, "/"), sequence_code(sequence->url)), ".bin");
 

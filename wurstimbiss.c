@@ -92,7 +92,7 @@ const char * allscores_string(char * picture, IntSequence *sequence_a, IntSequen
 	const char * sequence_a_code = sequence_code(sequence_a->url);
 	const char * sequence_b_code = sequence_code(sequence_b->url);
 
-	int strlen = snprintf(NULL, 0, "[%s]%s;%s;%f;%f;%u;%f;%f;%f;%f;%f;%f;%f;%f;%u;%f;%f;%f;%u;%s", picture,
+	int strlen = snprintf(NULL, 0, "[%s];%s;%s;%f;%f;%u;%f;%f;%f;%f;%f;%f;%f;%f;%u;%f;%f;%f;%u;%s", picture,
 			sequence_a_code, sequence_b_code, salami->tmscore, salami->andrew_scr, matchtype->count, matchtype->score,
 			matchtype->swscore, matchtype->blast, salami->id, salami->sw_score, salami->sw_smpl_score,
 			salami->sw_score_tot, salami->sw_cvr, salami->sw_raw, salami->frac_dme, salami->z_scr, salami->rmsd,
@@ -101,7 +101,7 @@ const char * allscores_string(char * picture, IntSequence *sequence_a, IntSequen
 	response = malloc((strlen + 1) * sizeof(*response));
 	massert((response!=NULL), "Can not allocate memory for out string");
 
-	snprintf(response, (strlen + 1), "[%s]%s;%s;%f;%f;%u;%f;%f;%f;%f;%f;%f;%f;%f;%u;%f;%f;%f;%u;%s", picture,
+	snprintf(response, (strlen + 1), "[%s];%s;%s;%f;%f;%u;%f;%f;%f;%f;%f;%f;%f;%f;%u;%f;%f;%f;%u;%s", picture,
 			sequence_a_code, sequence_b_code, salami->tmscore, salami->andrew_scr, matchtype->count, matchtype->score,
 			matchtype->swscore, matchtype->blast, salami->id, salami->sw_score, salami->sw_smpl_score,
 			salami->sw_score_tot, salami->sw_cvr, salami->sw_raw, salami->frac_dme, salami->z_scr, salami->rmsd,

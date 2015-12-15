@@ -17,15 +17,15 @@
 #include "wurstimbiss.h"
 
 typedef struct {
-	
-  	double *scr;
+
+	double *scr;
 	double H;
 	double K;
 	double lambda;
 
 } imbissblast;
 
-void getimbissblast(void *space, IntSequence *query, IntSequence **seqs, 
-	Uint noofseqs, FAlphabet *alphabet, imbissinfo *imbiss); 
+const char * getimbissblast(void *space, IntSequence *query, IntSequence **seqs, Uint noofseqs, FAlphabet *alphabet,
+		imbissinfo *imbiss);
 
 #endif

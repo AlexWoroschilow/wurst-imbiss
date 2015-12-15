@@ -249,8 +249,8 @@ int main(int argc, char** argv) {
 		Uint matches_count = (sequence->length - imbiss->minimal_length);
 		zlog_debug(logger, "Count:\t %u matches found", matches_count);
 
-
-		getimbissblast(space, sequence, sequences, sequence_count, imbiss->alphabet, imbiss);
+		const char * blast_statistic = getimbissblast(space, sequence, sequences, sequence_count, imbiss->alphabet, imbiss);
+		zlog_debug(logger, "Statistic:\t %s", blast_statistic);
 
 		rankSufmatch(space, suffix_array, matches, matches_count, imbiss->maximal_match, imbiss->minimal_length,
 				sequences, sequence_count, imbiss->filter, imbiss->select, imbiss->handler, sequence, imbiss, scores,

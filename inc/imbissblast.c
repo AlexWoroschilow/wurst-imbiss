@@ -64,8 +64,10 @@ int repsort(const void *a, const void *b) {
  * 
  */
 
-void getimbissblast(void *space, IntSequence *query, IntSequence **seqs, Uint noofseqs, FAlphabet *alphabet,
+const char * getimbissblast(void *space, IntSequence *query, IntSequence **seqs, Uint noofseqs, FAlphabet *alphabet,
 		imbissinfo *imbiss) {
+
+	char * response;
 
 	double *df, *sf, *scr;
 	double avgsum = 0, inputscr = 0, lambda = 0, K = 0;
@@ -106,17 +108,19 @@ void getimbissblast(void *space, IntSequence *query, IntSequence **seqs, Uint no
 	imbiss->K = K;
 	imbiss->lambda = lambda;
 
-	printf("\nBLAST statistics:\n-------------------\n");
-	printf("E(score): %f\n", avgsum);
-	printf("inputscr: %f\n", inputscr);
-	printf("lambda: %19.16e\n", lambda);
-	printf("check: %19.16e\n", checklambda(scr, alphabet->domainsize, df, avgsum, lambda));
-	printf("K: %19.16e\n\n", K);
-
 	FREEMEMORY(space, sortind);
 	FREEMEMORY(space, df);
 	FREEMEMORY(space, sf);
 
-	return;
+	int strlen = snprintf(NULL, 0, "BLAST: E(score): %f, Inputscr: %f, Lambda: %19.16e, Check: %19.16e, K: %19.16e",
+			avgsum, inputscr, lambda, checklambda(scr, alphabet->domainsize, df, avgsum, lambda), K);
+
+	response = malloc((strlen + 1) * sizeof(*response));
+	massert((response!=NULL), "Can not allocate memory for out string");
+
+	snprintf(response, (strlen + 1), "BLAST: E(score): %f, Inputscr: %f, Lambda: %19.16e, Check: %19.16e, K: %19.16e",
+			avgsum, inputscr, lambda, checklambda(scr, alphabet->domainsize, df, avgsum, lambda), K);
+
+	return (const char *) response;
 }
 

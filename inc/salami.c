@@ -232,108 +232,6 @@ void salami_sequence_dump(struct salami_sequence * sequence) {
  *
  */
 
-struct salami_info* alignment_aacid(void *config, void *space, Matchtype *match, IntSequence **s, int len, void *info) {
-
-	double zero_shift = 0.79;
-	double gap_open = 8.94;
-	double gap_widen = 0.88;
-
-	imbissinfo *imbiss = (imbissinfo*) config;
-	massert((imbiss != NULL), "Imbiss info object can not be empty");
-
-	stringset_t* imbiss_info = (stringset_t*) info;
-	struct salami_info *salami = malloc(sizeof(*salami));
-	massert((salami != NULL), "Can not allocate memory for salami object");
-
-	char *binary = merge(merge(merge(imbiss->path_binary, "/"), sequence_code(s[match->id]->url)), ".bin");
-
-	struct coord *coord_a = coord_read(binary);
-	struct coord *coord_b = coord_read(imbiss_info->strings[0].str);
-
-	massert((coord_a != NULL), "Coordinates for sequence A can not be empty");
-	massert((coord_b != NULL), "Coordinates for sequence B can not be empty");
-
-	struct seq *seq_a = coord_get_seq(coord_a);
-	struct seq *seq_b = coord_get_seq(coord_b);
-
-	massert((seq_a != NULL), "Sequence A can not be empty");
-	massert((seq_b != NULL), "Sequence B can not be empty");
-
-	struct score_mat *matrix_score = score_mat_new(seq_size(seq_a), seq_size(seq_b));
-	massert((matrix_score != NULL), "Substitution matrix can not be empty");
-	struct score_mat *matrix_unknown = score_mat_shift(matrix_score, zero_shift);
-	score_mat_destroy(matrix_unknown);
-
-	score_smat(matrix_score, seq_a, seq_b, imbiss->matrix_substitition);
-
-	struct score_mat *crap = NULL;
-	struct pair_set *pair_set_nw = score_mat_sum_full(&crap, matrix_score, gap_open, gap_widen, gap_open, gap_widen,
-	NULL, NULL, S_AND_W, NULL);
-
-	unsigned id = get_seq_id_simple(pair_set_nw, seq_a, seq_b);
-	struct score_struct *scores = get_scores(space, pair_set_nw, coord_a, coord_b, NULL);
-
-	salami->id = (float) (id / pair_set_nw->n);
-	salami->nw_score = pair_set_nw->score;
-	salami->nw_smpl_score = pair_set_nw->smpl_score;
-	salami->nw_score_tot = scores->scr_tot;
-	salami->nw_cvr = scores->cvr;
-	salami->nw_raw = scores->cvr * seq_size(seq_a);
-
-	score_mat_destroy(crap);
-	pair_set_destroy(pair_set_nw);
-	free(scores);
-
-	struct pair_set *pair_set_sw = score_mat_sum_full(&crap, matrix_score, gap_open, gap_widen, gap_open, gap_widen,
-	NULL, NULL, S_AND_W, NULL);
-	score_mat_destroy(crap);
-	scores = get_scores(space, pair_set_sw, coord_a, coord_b, NULL);
-
-	salami->sw_score = pair_set_sw->score;
-	salami->sw_smpl_score = pair_set_sw->smpl_score;
-	salami->sw_score_tot = scores->scr_tot;
-	salami->sw_cvr = scores->cvr;
-	salami->sw_raw = scores->cvr * seq_size(seq_a);
-
-	float frac_dme = get_dme_thresh(pair_set_sw, coord_a, coord_b);
-	float *altscores = get_alt_scores(space, 1000, matrix_score, pair_set_sw);
-
-	float dev = 0.0;
-	float mean = 0.0;
-
-	normalize_alt_scores(altscores, 1000, &mean, &dev);
-
-	float z_scr = (dev != 0) ? ((scores->scr_tot - mean) / dev) : 0.0;
-
-	float rmsd = 0.0;
-	struct coord *rmsd_a = NULL;
-	struct coord *rmsd_b = NULL;
-
-	coord_rmsd(pair_set_sw, coord_a, coord_b, 0, &rmsd, &rmsd_a, &rmsd_b);
-	double tmscore = tm_score(pair_set_sw, rmsd_a, rmsd_b);
-
-	float andrew_scr = frac_dme * ((scores->cvr * seq_size(seq_a)) / (MIN(seq_size(seq_a), seq_size(seq_b))));
-
-	salami->frac_dme = frac_dme;
-	salami->z_scr = z_scr;
-	salami->rmsd = rmsd;
-	salami->tmscore = tmscore;
-	salami->andrew_scr = andrew_scr;
-
-	free(scores);
-	FREEMEMORY(space, altscores);
-	pair_set_destroy(pair_set_sw);
-	seq_destroy(seq_a);
-	seq_destroy(seq_b);
-	coord_destroy(coord_a);
-	coord_destroy(coord_b);
-	coord_destroy(rmsd_a);
-	coord_destroy(rmsd_b);
-	score_mat_destroy(matrix_score);
-
-	return salami;
-}
-
 struct salami_info* doWurstAlignment(void *space, Matchtype *m, IntSequence **s, int len, void *info) {
 	char *p_a;
 	char *bin;
@@ -457,16 +355,12 @@ struct salami_info* doWurstAlignment(void *space, Matchtype *m, IntSequence **s,
 	return salami;
 }
 
-struct salami_info* alignment_wurst(void *config, void *space, Matchtype *matchtype, IntSequence **sequences, int len, void *info) {
-	return doWurstAlignment(space, matchtype, sequences, len, info);
-}
-
 
 /*----------------------------- latexWurstAlignment -----------------------------
- *    
+ *
  * invokes the Wurst library to calculate alignments and results
  *
- * 
+ *
  */
 
 void latexWurstAlignment(void *space, Matchtype *m, IntSequence **s, int len, void *info) {
@@ -568,3 +462,227 @@ void latexWurstAlignment(void *space, Matchtype *m, IntSequence **s, int len, vo
 	return;
 }
 
+
+
+struct salami_info* alignment_wurst(void *config, void *space, Matchtype *match, IntSequence **sequences, int len, void *info) {
+	float frac_dme, z_scr;
+	float *altscores;
+	unsigned int id;
+	float mean, dev, rmsd, andrew_scr;
+	double tmscore;
+	stringset_t *in;
+	struct coord *coord_a, *coord_b, *rmsd_a = NULL, *rmsd_b = NULL;
+	struct seq *seq_a, *seq_b;
+	struct prob_vec *pvec_a, *pvec_b;
+	struct score_mat *matrix;
+	struct score_struct *scores;
+	struct pair_set *set_sw, *set_nw;
+	struct score_mat *crap = NULL;
+	struct salami_info *salami = NULL;
+
+	imbissinfo *imbiss = (imbissinfo*) config;
+	massert((imbiss != NULL), "Imbiss info object can not be empty");
+
+	salami = malloc(sizeof(struct salami_info));
+
+	in = (stringset_t*) info;
+
+	char *binary = merge(merge(merge(imbiss->path_binary, "/"), sequence_code(sequences[match->id]->url)), ".bin");
+	char *vector = merge(merge(merge(imbiss->path_vector, "/"), sequence_code(sequences[match->id]->url)), ".vec");
+
+	coord_a = coord_read(binary);
+	coord_b = coord_read(in->strings[0].str);
+
+	seq_a = coord_get_seq(coord_a);
+	seq_b = coord_get_seq(coord_b);
+
+
+
+	pvec_a = prob_vec_read(vector);
+	pvec_b = prob_vec_read(in->strings[1].str);
+
+	matrix = score_mat_new(seq_size(seq_a), seq_size(seq_b));
+	score_pvec(matrix, pvec_a, pvec_b);
+
+	prob_vec_destroy(pvec_a);
+	prob_vec_destroy(pvec_b);
+
+	FREEMEMORY(space, binary);
+	FREEMEMORY(space, vector);
+
+	/*nw align*/
+
+	set_nw = score_mat_sum_full(&crap, matrix, sw1_pgap_open, sw1_pgap_widen, sw1_pgap_open, sw1_pgap_widen,
+	NULL, NULL, N_AND_W, NULL);
+
+	id = get_seq_id_simple(set_nw, seq_a, seq_b);
+	scores = get_scores(space, set_nw, coord_a, coord_b, NULL);
+
+	salami->id = (float) id / set_nw->n;
+	salami->nw_score = set_nw->score;
+	salami->nw_smpl_score = set_nw->smpl_score;
+	salami->nw_score_tot = scores->scr_tot;
+	salami->nw_cvr = scores->cvr;
+	salami->nw_raw = scores->cvr * seq_size(seq_a);
+
+	score_mat_destroy(crap);
+	pair_set_destroy(set_nw);
+	free(scores);
+
+	/*sw align*/
+
+	set_sw = score_mat_sum_full(&crap, matrix, sw1_pgap_open, sw1_pgap_widen, sw1_pgap_open, sw1_pgap_widen,
+	NULL, NULL, S_AND_W, NULL);
+	score_mat_destroy(crap);
+	scores = get_scores(space, set_sw, coord_a, coord_b, NULL);
+
+	salami->sw_score = set_sw->score;
+	salami->sw_smpl_score = set_sw->smpl_score;
+	salami->sw_score_tot = scores->scr_tot;
+	salami->sw_cvr = scores->cvr;
+	salami->sw_raw = scores->cvr * seq_size(seq_a);
+
+	frac_dme = get_dme_thresh(set_sw, coord_a, coord_b);
+	altscores = get_alt_scores(space, 1000, matrix, set_sw);
+	normalize_alt_scores(altscores, 1000, &mean, &dev);
+
+	/*@todo: get scores from get_scores and calc z-scr here!*/
+	z_scr = 0.0;
+	if (dev != 0) {
+		z_scr = (scores->scr_tot - mean) / dev;
+	}
+
+	/*rmsd*/
+	coord_rmsd(set_sw, coord_a, coord_b, 0, &rmsd, &rmsd_a, &rmsd_b);
+	tmscore = tm_score(set_sw, rmsd_a, rmsd_b);
+
+	/*andrew score*/
+	/*frac_dme (9) cvr (3)*/
+	/*alignmentsize (6) = sw_cvr (3) * seq_size(coord_get_seq(coord_b))*/
+	/*andrew_scr (2)= frac_dme(9) * (alignmentsize(6) / minsize) */
+
+	andrew_scr = frac_dme * ((scores->cvr * seq_size(seq_a)) / (MIN(seq_size(seq_a), seq_size(seq_b))));
+
+	salami->frac_dme = frac_dme;
+	salami->z_scr = z_scr;
+	salami->rmsd = rmsd;
+	salami->tmscore = tmscore;
+	salami->andrew_scr = andrew_scr;
+
+	free(scores);
+	FREEMEMORY(space, altscores);
+	pair_set_destroy(set_sw);
+	seq_destroy(seq_a);
+	seq_destroy(seq_b);
+	coord_destroy(coord_a);
+	coord_destroy(coord_b);
+	coord_destroy(rmsd_a);
+	coord_destroy(rmsd_b);
+	score_mat_destroy(matrix);
+
+	return salami;
+}
+
+struct salami_info* alignment_aacid(void *config, void *space, Matchtype *match, IntSequence **s, int len, void *info) {
+
+	double zero_shift = 0.79;
+	double gap_open = 8.94;
+	double gap_widen = 0.88;
+
+	imbissinfo *imbiss = (imbissinfo*) config;
+	massert((imbiss != NULL), "Imbiss info object can not be empty");
+
+	stringset_t* imbiss_info = (stringset_t*) info;
+	struct salami_info *salami = malloc(sizeof(*salami));
+	massert((salami != NULL), "Can not allocate memory for salami object");
+
+	char *binary = merge(merge(merge(imbiss->path_binary, "/"), sequence_code(s[match->id]->url)), ".bin");
+
+	struct coord *coord_a = coord_read(binary);
+	struct coord *coord_b = coord_read(imbiss_info->strings[0].str);
+
+	massert((coord_a != NULL), "Coordinates for sequence A can not be empty");
+	massert((coord_b != NULL), "Coordinates for sequence B can not be empty");
+
+	struct seq *seq_a = coord_get_seq(coord_a);
+	struct seq *seq_b = coord_get_seq(coord_b);
+
+	massert((seq_a != NULL), "Sequence A can not be empty");
+	massert((seq_b != NULL), "Sequence B can not be empty");
+
+	struct score_mat *matrix_score = score_mat_new(seq_size(seq_a), seq_size(seq_b));
+	massert((matrix_score != NULL), "Substitution matrix can not be empty");
+	struct score_mat *matrix_unknown = score_mat_shift(matrix_score, zero_shift);
+	score_mat_destroy(matrix_unknown);
+
+	score_smat(matrix_score, seq_a, seq_b, imbiss->matrix_substitition);
+
+	struct score_mat *crap = NULL;
+	struct pair_set *pair_set_nw = score_mat_sum_full(&crap, matrix_score, gap_open, gap_widen, gap_open, gap_widen,
+	NULL, NULL, S_AND_W, NULL);
+
+	unsigned id = get_seq_id_simple(pair_set_nw, seq_a, seq_b);
+	struct score_struct *scores = get_scores(space, pair_set_nw, coord_a, coord_b, NULL);
+
+	salami->id = (float) (id / pair_set_nw->n);
+	salami->nw_score = pair_set_nw->score;
+	salami->nw_smpl_score = pair_set_nw->smpl_score;
+	salami->nw_score_tot = scores->scr_tot;
+	salami->nw_cvr = scores->cvr;
+	salami->nw_raw = scores->cvr * seq_size(seq_a);
+
+	score_mat_destroy(crap);
+	pair_set_destroy(pair_set_nw);
+
+	FREEMEMORY(space, binary);
+	FREEMEMORY(space, scores);
+
+	struct pair_set *pair_set_sw = score_mat_sum_full(&crap, matrix_score, gap_open, gap_widen, gap_open, gap_widen,
+	NULL, NULL, S_AND_W, NULL);
+	score_mat_destroy(crap);
+	scores = get_scores(space, pair_set_sw, coord_a, coord_b, NULL);
+
+	salami->sw_score = pair_set_sw->score;
+	salami->sw_smpl_score = pair_set_sw->smpl_score;
+	salami->sw_score_tot = scores->scr_tot;
+	salami->sw_cvr = scores->cvr;
+	salami->sw_raw = scores->cvr * seq_size(seq_a);
+
+	float frac_dme = get_dme_thresh(pair_set_sw, coord_a, coord_b);
+	float *altscores = get_alt_scores(space, 1000, matrix_score, pair_set_sw);
+
+	float dev = 0.0;
+	float mean = 0.0;
+
+	normalize_alt_scores(altscores, 1000, &mean, &dev);
+
+	float z_scr = (dev != 0) ? ((scores->scr_tot - mean) / dev) : 0.0;
+
+	float rmsd = 0.0;
+	struct coord *rmsd_a = NULL;
+	struct coord *rmsd_b = NULL;
+
+	coord_rmsd(pair_set_sw, coord_a, coord_b, 0, &rmsd, &rmsd_a, &rmsd_b);
+	double tmscore = tm_score(pair_set_sw, rmsd_a, rmsd_b);
+
+	float andrew_scr = frac_dme * ((scores->cvr * seq_size(seq_a)) / (MIN(seq_size(seq_a), seq_size(seq_b))));
+
+	salami->frac_dme = frac_dme;
+	salami->z_scr = z_scr;
+	salami->rmsd = rmsd;
+	salami->tmscore = tmscore;
+	salami->andrew_scr = andrew_scr;
+
+	free(scores);
+	FREEMEMORY(space, altscores);
+	pair_set_destroy(pair_set_sw);
+	seq_destroy(seq_a);
+	seq_destroy(seq_b);
+	coord_destroy(coord_a);
+	coord_destroy(coord_b);
+	coord_destroy(rmsd_a);
+	coord_destroy(rmsd_b);
+	score_mat_destroy(matrix_score);
+
+	return salami;
+}

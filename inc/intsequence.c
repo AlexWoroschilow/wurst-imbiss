@@ -371,14 +371,15 @@ IntSequence* sequence_init(void *space) {
 	return initSequence(space);
 }
 
-IntSequence ** sequence_load_csv(void *space, char* filename, char *delimeter, Uint *linecount,
-		IntSequence* (*loader)(void *space, char *filename)) {
+IntSequence ** sequence_load_csv(void *imbiss, void *space, char* filename, char *delimeter, Uint *linecount,
+		IntSequence* (*loader)(void *imbiss, void *space, char *filename)) {
+
 	Uint i;
 	stringset_t **fn = readcsv(space, filename, delimeter, linecount);
 	IntSequence ** sequences = ALLOCMEMORY(space, NULL, IntSequence *, *linecount);
 	for (i = 0; i < *linecount; i++) {
 		const char * file = (const char *) SETSTR(fn[i], 0);
-		sequences[i] = loader(space, file);
+		sequences[i] = loader(imbiss, space, file);
 	}
 
 	for (i = 0; i < *linecount; i++) {
@@ -427,7 +428,6 @@ Uint * sequence_salami_to_uint(struct salami_sequence * sequence) {
 	return sequence_uint;
 }
 
-
 char * sequence_code(char *url) {
 	int i;
 	char * response;
@@ -440,7 +440,7 @@ char * sequence_code(char *url) {
 	return strdup((const char *) url + i);
 }
 
-IntSequence* sequence_aacid_load(void *space, char *filename) {
+IntSequence* sequence_aacid_load(void *imbiss, void *space, char *filename) {
 	long size;
 	FILE *infile;
 
@@ -464,7 +464,7 @@ IntSequence* sequence_aacid_load(void *space, char *filename) {
 	Uint *info = ALLOCMEMORY(space, NULL, Uint, sequence->length);
 	fread(info, sizeof(Uint), sequence->length, infile);
 
-	struct salami_sequence * sequence_salami = salami_sequence_string(sequence);
+	struct salami_sequence * sequence_salami = salami_sequence_string(imbiss, sequence);
 	massert((sequence_salami != NULL), "Salami sequence can not be null");
 
 	sequence->length = sequence_salami->length;
@@ -476,7 +476,7 @@ IntSequence* sequence_aacid_load(void *space, char *filename) {
 	return sequence;
 }
 
-IntSequence* sequence_salami_load(void *space, char *filename) {
+IntSequence* sequence_salami_load(void *imbiss, void *space, char *filename) {
 	return loadSequence(space, filename);
 }
 

@@ -200,7 +200,7 @@ int main(int argc, char** argv) {
 	zlog_debug(logger, "Load:\t%s", imbiss->file_sequences);
 
 	time(&time_start);
-	IntSequence **sequences = sequence_load_csv(space, imbiss->file_sequences, "", &sequence_count, sequence_aacid_load);
+	IntSequence **sequences = sequence_load_csv(imbiss, space, imbiss->file_sequences, "", &sequence_count, sequence_aacid_load);
 	massert((sequences != NULL), "Sequence collection can not be empty");
 	time(&time_end);
 
@@ -224,7 +224,7 @@ int main(int argc, char** argv) {
 		/*get query form batchfile*/
 		char *inputfile = SETSTR(queries[i], 0);
 
-		IntSequence *sequence = sequence_aacid_load(space, inputfile);
+		IntSequence *sequence = sequence_aacid_load(imbiss, space, inputfile);
 		massert((sequence != NULL), "Sequence object can not be null");
 
 		time(&time_start);

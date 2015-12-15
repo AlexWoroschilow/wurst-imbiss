@@ -23,6 +23,8 @@
 #include "stringutils.h"
 #include "mathematics.h"
 #include "salami.h"
+#include "wurstimbiss.h"
+
 /*WURST include*/
 #include "read_seq_i.h"
 #include "score_mat_i.h"
@@ -188,14 +190,13 @@ get_scores(void *space, struct pair_set *set, struct coord *a, struct coord *b, 
 	return scores;
 }
 
-/**
- * TODO: destroy coordinates and sequence
- */
-struct salami_sequence * salami_sequence_string(IntSequence *sequence) {
-	char *path_binary = malloc(1024);
-	sprintf(path_binary, "/smallfiles/public/no_backup/bm/pdb_all_bin/%5s.bin\0", sequence->url + 56);
+struct salami_sequence * salami_sequence_string(void *imbiss, IntSequence *sequence) {
 
-	struct coord *coordinates = coord_read(path_binary);
+	imbissinfo *imbissinfo = imbiss;
+
+	char *binary = merge(merge(merge(imbissinfo->path_binary, "/"), sequence_code(sequence->url)), ".bin");
+
+	struct coord *coordinates = coord_read(binary);
 	massert((coordinates != NULL), "Coordinates object can not be null");
 
 	struct seq *sequence_wurst = coord_get_seq(coordinates);
@@ -261,7 +262,8 @@ struct salami_info* alignment_aacid(void *space, Matchtype *match, IntSequence *
 	score_mat_destroy(matrix_unknown);
 
 	// TODO: replace to path from configuration file
-	const char * matrix_substitition_file ="/home/stud2013/ovoroshylov/Clustering/wurst-imbiss/vendor/wurst/matrix/blosum62.mat";
+	const char * matrix_substitition_file =
+			"/home/stud2013/ovoroshylov/Clustering/wurst-imbiss/vendor/wurst/matrix/blosum62.mat";
 	struct score_mat *matrix_substitition = sub_mat_read(matrix_substitition_file);
 	massert((matrix_substitition != NULL), "Substitution matrix can not be empty");
 

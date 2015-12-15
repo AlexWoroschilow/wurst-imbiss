@@ -10,7 +10,6 @@
  * @date Mon 27 Nov 2006
  *
  */
-
 #include "basic-types.h"
 
 typedef struct {
@@ -27,6 +26,8 @@ typedef struct {
 	Uint length;
 
 } IntSequence;
+
+
 
 void destructSequence(void *, IntSequence *);
 IntSequence* initSequence(void *);
@@ -56,20 +57,20 @@ char * sequence_print(void *space, IntSequence *s, Uint cols);
  * using some load handler like 'sequence_load_wurst'
  * or 'sequence_load_pdb'
  */
-IntSequence ** sequence_load_csv(void *space, char* filename, char *delimeter, Uint *linecount,
-		IntSequence* (*loader)(void *space, char *filename));
+IntSequence ** sequence_load_csv(void *imbiss, void *space, char* filename, char *delimeter, Uint *linecount,
+		IntSequence* (*loader)(void *imbiss, void *space, char *filename));
 
 /**
  * Load sequence from given file using wurst
  * the normal amino-acids based sequence should be loaded
  */
-IntSequence* sequence_aacid_load(void *space, char *filename);
+IntSequence* sequence_aacid_load(void *imbiss, void *space, char *filename);
 
 /**
  * Load sequence from given file using wurst
  * the structure-alphabet based sequence should be loaded
  */
-IntSequence* sequence_salami_load(void *space, char *filename);
+IntSequence* sequence_salami_load(void *imbiss, void *space, char *filename);
 
 /**
  * Dump sequence with salami chain

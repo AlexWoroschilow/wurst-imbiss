@@ -199,6 +199,7 @@ struct salami_sequence * salami_sequence_string(void *imbiss, IntSequence *seque
 
 	struct coord *coordinates = coord_read(binary);
 	massert((coordinates != NULL), "Coordinates object can not be null");
+	free(binary);
 
 	struct seq *sequence_wurst = coord_get_seq(coordinates);
 	massert((sequence_wurst != NULL), "Coordinates object can not be null");
@@ -209,7 +210,6 @@ struct salami_sequence * salami_sequence_string(void *imbiss, IntSequence *seque
 	response->length = sequence_wurst->length;
 	response->sequence = seq_print(sequence_wurst);
 
-	free(binary);
 	coord_destroy(coordinates);
 	seq_destroy(sequence_wurst);
 

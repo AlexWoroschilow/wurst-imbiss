@@ -182,9 +182,6 @@ int main(int argc, char** argv) {
 	ConfigReadUnsignedInt(cfg, "limits", "minimal_length", &imbiss->minimal_length, 10);
 	ConfigFree(cfg);
 
-	imbiss->matrix_substitition = sub_mat_read(imbiss->file_substitution);
-	massert((imbiss->matrix_substitition != NULL), "Substitution matrix can not be empty");
-
 	assert(zlog_init("wurstimblog.conf") == CONFIG_OK);
 	zlog_category_t *logger = zlog_get_category("wurstimbiss");
 	zlog_info(logger, "File abc:\t%s", imbiss->file_alphabet);
@@ -195,6 +192,10 @@ int main(int argc, char** argv) {
 	zlog_info(logger, "Min:\t%d characters", imbiss->minimal_length);
 	zlog_info(logger, "Min:\t%d seeds", imbiss->minimal_seed);
 
+	zlog_debug(logger, "Load:\t%s", imbiss->file_substitution);
+	imbiss->matrix_substitition = sub_mat_read(imbiss->file_substitution);
+	massert((imbiss->matrix_substitition != NULL), "Substitution matrix can not be empty");
+
 	zlog_debug(logger, "Load:\t%s", imbiss->file_alphabet);
 	imbiss->alphabet = alphabet_load_csv(space, imbiss->file_alphabet);
 	massert((imbiss->alphabet != NULL), "Alphabet object can not be null");
@@ -203,8 +204,7 @@ int main(int argc, char** argv) {
 	zlog_debug(logger, "Load:\t%s", imbiss->file_sequences);
 
 	time(&time_start);
-	IntSequence **sequences = sequence_load_csv(imbiss, space, imbiss->file_sequences, "", &sequence_count,
-			sequence_aacid_load);
+	IntSequence **sequences = sequence_load_csv(imbiss, space, imbiss->file_sequences, "", &sequence_count, sequence_aacid_load);
 	massert((sequences != NULL), "Sequence collection can not be empty");
 	time(&time_end);
 

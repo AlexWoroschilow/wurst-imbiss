@@ -457,6 +457,11 @@ struct salami_info* doWurstAlignment(void *space, Matchtype *m, IntSequence **s,
 	return salami;
 }
 
+struct salami_info* alignment_wurst(void *config, void *space, Matchtype *matchtype, IntSequence **sequences, int len, void *info) {
+	return doWurstAlignment(space, matchtype, sequences, len, info);
+}
+
+
 /*----------------------------- latexWurstAlignment -----------------------------
  *    
  * invokes the Wurst library to calculate alignments and results

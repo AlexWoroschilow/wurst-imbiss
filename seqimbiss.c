@@ -169,8 +169,7 @@ int main(int argc, char** argv) {
 
 	assert(ConfigReadFile("wurstimbiss.conf", &cfg) == CONFIG_OK);
 	ConfigReadString(cfg, "sources", "file_batch", imbiss->file_batch, sizeof(imbiss->file_batch), 0);
-	ConfigReadString(cfg, "sources", "file_substitution", imbiss->file_substitution, sizeof(imbiss->file_substitution),
-			0);
+	ConfigReadString(cfg, "sources", "file_substitution", imbiss->file_substitution, sizeof(imbiss->file_substitution), 0);
 	ConfigReadString(cfg, "sources", "file_alphabet", imbiss->file_alphabet, sizeof(imbiss->file_alphabet), 0);
 	ConfigReadString(cfg, "sources", "file_sequences", imbiss->file_sequences, sizeof(imbiss->file_sequences), 0);
 	ConfigReadString(cfg, "sources", "path_binary", imbiss->path_binary, sizeof(imbiss->path_binary), 0);

@@ -484,6 +484,7 @@ struct salami_info* alignment_wurst(void *config, void *space, Matchtype *match,
 	massert((imbiss != NULL), "Imbiss info object can not be empty");
 
 	salami = malloc(sizeof(struct salami_info));
+	massert((salami != NULL), "Can not allocate memory for salami object");
 
 	in = (stringset_t*) info;
 
@@ -493,13 +494,20 @@ struct salami_info* alignment_wurst(void *config, void *space, Matchtype *match,
 	coord_a = coord_read(binary);
 	coord_b = coord_read(in->strings[0].str);
 
+	massert((coord_a != NULL), "Coordinates for sequence A can not be empty");
+	massert((coord_b != NULL), "Coordinates for sequence B can not be empty");
+
 	seq_a = coord_get_seq(coord_a);
 	seq_b = coord_get_seq(coord_b);
 
-
+	massert((seq_a != NULL), "Sequence A can not be empty");
+	massert((seq_b != NULL), "Sequence B can not be empty");
 
 	pvec_a = prob_vec_read(vector);
 	pvec_b = prob_vec_read(in->strings[1].str);
+
+	massert((pvec_a != NULL), "Vector for sequence A can not be empty");
+	massert((pvec_b != NULL), "Vector for sequence B can not be empty");
 
 	matrix = score_mat_new(seq_size(seq_a), seq_size(seq_b));
 	score_pvec(matrix, pvec_a, pvec_b);

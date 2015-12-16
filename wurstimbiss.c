@@ -168,14 +168,17 @@ int main(int argc, char** argv) {
 	imbiss->handler = (imbissinfo_handler *) allscores;
 	imbiss->filter = (imbissinfo_filter *) swconstfilter;
 	imbiss->select = (imbissinfo_select *) selectSW;
+	imbiss->file_configuration = getopt_configfile(argc, argv);
 
-	assert(ConfigReadFile("wurstimbiss.conf", &cfg) == CONFIG_OK);
+	assert(ConfigReadFile(imbiss->file_configuration, &cfg) == CONFIG_OK);
 	ConfigReadString(cfg, "sources", "file_batch", imbiss->file_batch, sizeof(imbiss->file_batch), 0);
 	ConfigReadString(cfg, "sources", "file_substitution", imbiss->file_substitution, sizeof(imbiss->file_substitution), 0);
 	ConfigReadString(cfg, "sources", "file_alphabet", imbiss->file_alphabet, sizeof(imbiss->file_alphabet), 0);
 	ConfigReadString(cfg, "sources", "file_sequences", imbiss->file_sequences, sizeof(imbiss->file_sequences), 0);
+	ConfigReadString(cfg, "sources", "file_logconfig", imbiss->file_logconfig, sizeof(imbiss->file_logconfig), 0);
 	ConfigReadString(cfg, "sources", "path_binary", imbiss->path_binary, sizeof(imbiss->path_binary), 0);
 	ConfigReadString(cfg, "sources", "path_vector", imbiss->path_vector, sizeof(imbiss->path_vector), 0);
+
 
 	ConfigReadUnsignedInt(cfg, "limits", "maximal_hit", &imbiss->maximal_hit, 10000);
 	ConfigReadUnsignedInt(cfg, "limits", "maximal_match", &imbiss->maximal_match, 50);
@@ -183,12 +186,14 @@ int main(int argc, char** argv) {
 	ConfigReadUnsignedInt(cfg, "limits", "minimal_length", &imbiss->minimal_length, 10);
 	ConfigFree(cfg);
 
-	assert(zlog_init("wurstimblog.conf") == CONFIG_OK);
+	assert(zlog_init((const char *)imbiss->file_logconfig) == CONFIG_OK);
 	zlog_category_t *logger = zlog_get_category("wurstimbiss");
-	zlog_info(logger, "File abc:\t%s", imbiss->file_alphabet);
-	zlog_info(logger, "File seq:\t%s", imbiss->file_sequences);
-	zlog_info(logger, "File str:\t%s", imbiss->file_batch);
-	zlog_info(logger, "File sub:\t%s", imbiss->file_substitution);
+	zlog_info(logger, "File:\t configuration %s", imbiss->file_configuration);
+	zlog_info(logger, "File:\t configuration for logger%s", imbiss->file_logconfig);
+	zlog_info(logger, "File:\t alphabet %s", imbiss->file_alphabet);
+	zlog_info(logger, "File:\t sequences %s", imbiss->file_sequences);
+	zlog_info(logger, "File:\t structures %s", imbiss->file_batch);
+	zlog_info(logger, "File:\t substitution matrix %s", imbiss->file_substitution);
 	zlog_info(logger, "Max:\t%d matches from suffix array", imbiss->maximal_match);
 	zlog_info(logger, "Min:\t%d characters", imbiss->minimal_length);
 	zlog_info(logger, "Min:\t%d seeds", imbiss->minimal_seed);

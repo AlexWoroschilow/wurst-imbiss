@@ -122,7 +122,9 @@ const char * allscores_string(char * picture, IntSequence *sequence_a, IntSequen
  */
 int allscores(void *space, IntSequence *sequence_a, Matchtype *matchtype, IntSequence **sequences, Uint len, Uint match,
 		void *info) {
+
 	imbissinfo *imbiss = (imbissinfo*) info;
+	massert((imbiss != NULL), "Imbiss info object can not be null");
 
 	if (matchtype->count <= imbiss->minimal_seed) {
 		return 0;
@@ -132,6 +134,7 @@ int allscores(void *space, IntSequence *sequence_a, Matchtype *matchtype, IntSeq
 	}
 
 	IntSequence *sequence_b = sequences[matchtype->id];
+	massert((sequence_b != NULL), "Sequence object can not be null");
 
 	char *picture = depictSequence(space, len, 20, matchtype->pos, matchtype->count, '*');
 	massert((picture != NULL), "Picture object can not be null");
@@ -143,6 +146,18 @@ int allscores(void *space, IntSequence *sequence_a, Matchtype *matchtype, IntSeq
 
 	FREEMEMORY(space, picture);
 	return 1;
+}
+
+const char * getopt_configfile(int argc, char** argv) {
+	int c;
+	char *configfile = NULL;
+	while ((c = getopt(argc, argv, "c:")) != -1) {
+		switch (c) {
+		case 'c':
+			configfile = optarg;
+		}
+	}
+	return (const char *) configfile;
 }
 
 int main(int argc, char** argv) {
@@ -166,12 +181,14 @@ int main(int argc, char** argv) {
 	imbiss->handler = (imbissinfo_handler *) allscores;
 	imbiss->filter = (imbissinfo_filter *) swconstfilter;
 	imbiss->select = (imbissinfo_select *) selectSW;
+	imbiss->file_configuration = getopt_configfile(argc, argv);
 
-	assert(ConfigReadFile("wurstimbiss.conf", &cfg) == CONFIG_OK);
+	assert(ConfigReadFile(imbiss->file_configuration, &cfg) == CONFIG_OK);
 	ConfigReadString(cfg, "sources", "file_batch", imbiss->file_batch, sizeof(imbiss->file_batch), 0);
 	ConfigReadString(cfg, "sources", "file_substitution", imbiss->file_substitution, sizeof(imbiss->file_substitution), 0);
 	ConfigReadString(cfg, "sources", "file_alphabet", imbiss->file_alphabet, sizeof(imbiss->file_alphabet), 0);
 	ConfigReadString(cfg, "sources", "file_sequences", imbiss->file_sequences, sizeof(imbiss->file_sequences), 0);
+	ConfigReadString(cfg, "sources", "file_logconfig", imbiss->file_logconfig, sizeof(imbiss->file_logconfig), 0);
 	ConfigReadString(cfg, "sources", "path_binary", imbiss->path_binary, sizeof(imbiss->path_binary), 0);
 	ConfigReadString(cfg, "sources", "path_vector", imbiss->path_vector, sizeof(imbiss->path_vector), 0);
 
@@ -181,15 +198,17 @@ int main(int argc, char** argv) {
 	ConfigReadUnsignedInt(cfg, "limits", "minimal_length", &imbiss->minimal_length, 10);
 	ConfigFree(cfg);
 
-	assert(zlog_init("wurstimblog.conf") == CONFIG_OK);
+	assert(zlog_init((const char *)imbiss->file_logconfig) == CONFIG_OK);
 	zlog_category_t *logger = zlog_get_category("wurstimbiss");
-	zlog_info(logger, "File abc:\t%s", imbiss->file_alphabet);
-	zlog_info(logger, "File seq:\t%s", imbiss->file_sequences);
-	zlog_info(logger, "File str:\t%s", imbiss->file_batch);
-	zlog_info(logger, "File sub:\t%s", imbiss->file_substitution);
-	zlog_info(logger, "Max:\t%d matches from suffix array", imbiss->maximal_match);
-	zlog_info(logger, "Min:\t%d characters", imbiss->minimal_length);
-	zlog_info(logger, "Min:\t%d seeds", imbiss->minimal_seed);
+	zlog_info(logger, "File:\t configuration %s", imbiss->file_configuration);
+	zlog_info(logger, "File:\t configuration for logger%s", imbiss->file_logconfig);
+	zlog_info(logger, "File:\t alphabet %s", imbiss->file_alphabet);
+	zlog_info(logger, "File:\t sequences %s", imbiss->file_sequences);
+	zlog_info(logger, "File:\t structures %s", imbiss->file_batch);
+	zlog_info(logger, "File:\t substitution matrix %s", imbiss->file_substitution);
+	zlog_info(logger, "Max:\t %d matches from suffix array", imbiss->maximal_match);
+	zlog_info(logger, "Min:\t %d characters", imbiss->minimal_length);
+	zlog_info(logger, "Min:\t %d seeds", imbiss->minimal_seed);
 
 	zlog_debug(logger, "Load:\t%s", imbiss->file_substitution);
 	imbiss->matrix_substitition = sub_mat_read(imbiss->file_substitution);
@@ -203,7 +222,8 @@ int main(int argc, char** argv) {
 	zlog_debug(logger, "Load:\t%s", imbiss->file_sequences);
 
 	time(&time_start);
-	IntSequence **sequences = sequence_load_csv(imbiss, space, imbiss->file_sequences, "", &sequence_count, sequence_aacid_load);
+	IntSequence **sequences = sequence_load_csv(imbiss, space, imbiss->file_sequences, "", &sequence_count,
+			sequence_aacid_load);
 	massert((sequences != NULL), "Sequence collection can not be empty");
 	time(&time_end);
 

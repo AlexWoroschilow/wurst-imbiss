@@ -67,6 +67,8 @@ typedef struct {
 	Uint minimal_seed;
 	Uint minimal_length;
 
+	const char * file_configuration;
+	char file_logconfig[1024];
 	char file_batch[1024];
 	char file_substitution[1024];
 	char file_alphabet[1024];

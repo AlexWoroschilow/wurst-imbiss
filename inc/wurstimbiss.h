@@ -32,6 +32,7 @@
 typedef int (*imbissinfo_handler)(void *, IntSequence *, Matchtype *, IntSequence **, Uint, Uint, void *);
 typedef double (*imbissinfo_filter)(void *, Matchtype *, IntSequence *, IntSequence *, Uint *, Uint, Uint, void *);
 typedef Matchtype* (*imbissinfo_select)(void *, Matchtype *, Uint k, IntSequence *, IntSequence **, void *);
+typedef IntSequence* (*imbissinfo_loader)(void *imbiss, void *space, char *filename);
 
 typedef struct {
 
@@ -58,9 +59,10 @@ typedef struct {
 	double lambda;
 	double H;
 	double K;
-	imbissinfo_handler * handler;
-	imbissinfo_filter * filter;
-	imbissinfo_select * select;
+	imbissinfo_handler handler;
+	imbissinfo_loader loader;
+	imbissinfo_filter filter;
+	imbissinfo_select select;
 
 	Uint maximal_hit;
 	Uint maximal_match;
@@ -68,15 +70,15 @@ typedef struct {
 	Uint minimal_length;
 
 	const char * file_configuration;
-	char file_logconfig[1024];
-	char file_batch[1024];
-	char file_substitution[1024];
-	char file_alphabet[1024];
-	char file_sequences[1024];
-	char file_report[1024];
-	char path_binary[1024];
-	char path_vector[1024];
-	char path_pdb[1024];
+	char type[32];
+	char logger[1024];
+	char structlist[1024];
+	char substitution[1024];
+	char alphabetfile[1024];
+	char sequencelist[1024];
+	char binarypath[1024];
+	char vectorpath[1024];
+
 } imbissinfo;
 
 #endif

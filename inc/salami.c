@@ -195,7 +195,7 @@ struct salami_sequence * salami_sequence_string(void *imbiss, IntSequence *seque
 	imbissinfo *imbissinfo = imbiss;
 	massert((imbiss != NULL), "Imbiss info object can not be empty");
 
-	char *binary = merge(merge(merge(imbissinfo->path_binary, "/"), sequence_code(sequence->url)), ".bin");
+	char *binary = merge(merge(merge(imbissinfo->binarypath, "/"), sequence_code(sequence->url)), ".bin");
 
 	struct coord *coordinates = coord_read(binary);
 	massert((coordinates != NULL), "Coordinates object can not be null");
@@ -488,8 +488,8 @@ struct salami_info* alignment_wurst(void *config, void *space, Matchtype *match,
 
 	in = (stringset_t*) info;
 
-	char *binary = merge(merge(merge(imbiss->path_binary, "/"), sequence_code(sequences[match->id]->url)), ".bin");
-	char *vector = merge(merge(merge(imbiss->path_vector, "/"), sequence_code(sequences[match->id]->url)), ".vec");
+	char *binary = merge(merge(merge(imbiss->binarypath, "/"), sequence_code(sequences[match->id]->url)), ".bin");
+	char *vector = merge(merge(merge(imbiss->vectorpath, "/"), sequence_code(sequences[match->id]->url)), ".vec");
 
 	coord_a = coord_read(binary);
 	coord_b = coord_read(in->strings[0].str);
@@ -604,7 +604,7 @@ struct salami_info* alignment_aacid(void *config, void *space, Matchtype *match,
 	struct salami_info *salami = malloc(sizeof(*salami));
 	massert((salami != NULL), "Can not allocate memory for salami object");
 
-	char *binary = merge(merge(merge(imbiss->path_binary, "/"), sequence_code(s[match->id]->url)), ".bin");
+	char *binary = merge(merge(merge(imbiss->binarypath, "/"), sequence_code(s[match->id]->url)), ".bin");
 
 	struct coord *coord_a = coord_read(binary);
 	struct coord *coord_b = coord_read(imbiss_info->strings[0].str);

@@ -46,5 +46,7 @@ void constructLcp (void *, Suffixarray *);
 void destructSufArr (void *, Suffixarray *); 
 PairSint testPairSint();
 
+void suffix_array_destruct(void *space, Suffixarray *arr);
+Suffixarray* suffix_array_init(void *space, IntSequence **sequences, Uint length, FAlphabet* alphabet);
 #endif
 

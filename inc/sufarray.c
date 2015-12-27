@@ -123,10 +123,6 @@ void destructSufArr(void *space, Suffixarray *arr) {
 	return;
 }
 
-void suffix_array_destruct(void *space, Suffixarray *arr) {
-	destructSufArr(space, arr);
-}
-
 /*------------------------------ computeLcpTab -------------------------------
  *    
  * computes the lcp tab from suftab and inv_suftab in O(n).
@@ -172,8 +168,7 @@ void dumpSufArr(Suffixarray *arr) {
 	Uint i;
 
 	for (i = 0; i < arr->numofsuffixes; i++) {
-		printf("%d \t %d \t %d \t %d \t %d \t %d\n", i, arr->suftab[i], arr->lcptab[i], arr->inv_suftab[i],
-				*arr->suffixptr[arr->suftab[i]],
+		printf("%d \t %d \t %d \t %d \t %d \t %d\n", i, arr->suftab[i], arr->lcptab[i], arr->inv_suftab[i], *arr->suffixptr[arr->suftab[i]],
 				arr->seq->sequences[arr->suffixptr[arr->suftab[i]] - arr->seq->sequences]);
 	}
 
@@ -206,4 +201,8 @@ Suffixarray* suffix_array_init(void *space, IntSequence **sequences, Uint length
 	Suffixarray* suffix_array = constructSufArr(space, sequences, length, alphabet);
 	constructLcp(space, suffix_array);
 	return suffix_array;
+}
+
+void suffix_array_destruct(void *space, Suffixarray *arr) {
+	destructSufArr(space, arr);
 }

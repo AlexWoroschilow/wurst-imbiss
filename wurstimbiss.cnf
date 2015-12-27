@@ -1,0 +1,53 @@
+[common]
+# Types: salami, aacid
+type=salami
+
+[sources]
+# List with sequences to process
+structlist=./var/pdb/pdb_02_local.lib
+
+# List with all sequences you can find
+sequencelist=./var/seq/pdb_02_local.list
+
+# Subsitution matrix to calculate a similarity
+substitution=./vendor/wurst/matrix/blosum62.mat
+
+# Custom alphabet from Steve Hoffmann
+# i have no idea how it should looks like 
+alphabet=./var/abc/alphabet_t500
+
+# Configuration file for logger library
+# i use a zlog, so you can just read a documatation
+# for zlog in internet, google is your friend 
+logger=./logger.cnf
+
+# Path where a binary files are stored
+binarypath=/smallfiles/public/no_backup/bm/pdb_all_bin
+
+# Path where a vector 
+# files are stored
+vectorpath=/smallfiles/public/no_backup/bm/pdb_all_vec_6mer_struct
+
+# Path to pdb structires 
+# files are stored
+pdbpath=/smallfiles/public/no_backup/bm/
+
+[limits]
+# Minimal length of structure
+# it is a same for structural sequences and 
+# for amino-acid sequences, 
+minimal_length=15
+
+# Process only matches with 
+# minimal count of seeds
+# like here
+minimal_seed=4
+
+# Process maximal maximal_hit results from 
+# suffix array matches, matches are sorted by 
+# some score, so a best matches are always on top
+maximal_hits=50
+
+# How many matches from suffix array we 
+# want to have 
+maximal_match=10000

@@ -21,7 +21,6 @@
 #include "intsequence.h"
 #include "list.h"
 #include "depictseqs.h"
-#include "gnuplot_i.h"
 #include "dpalign.h"
 #include "cantor.h"
 #include "wurstimbiss.h"

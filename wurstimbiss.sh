@@ -9,6 +9,7 @@
 
 
 export LD_LIBRARY_PATH=/home/sensey/Projects/WurstImbiss/vendor/zlog/lib:$LD_LIBRARY_PATH
-#valgrind --leak-check=full 
-./wurstimbiss.x -l 9 -l 15 -n 50
+#export LD_LIBRARY_PATH=/home/stud2013/ovoroshylov/Clustering/wurst-imbiss/vendor/zlog/lib:$LD_LIBRARY_PATH
+#valgrind --leak-check=full ./Debug/WurstImbiss -c ./wurstimbiss.cnf
+./Debug/WurstImbiss -c ./wurstimbiss.cnf
 

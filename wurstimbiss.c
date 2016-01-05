@@ -195,6 +195,7 @@ int main(int argc, char** argv) {
 					));
 		}
 
+		time(&time_start);
 		rankSufmatch( //
 				space, //
 				suffix_array, //
@@ -211,6 +212,8 @@ int main(int argc, char** argv) {
 				scores, //
 				depictsw //
 				);
+		time(&time_end);
+		logger_info("Time:\t rank of suffix match in %f sec", difftime(time_end, time_start));
 
 		destructSequence(space, sequence);
 

@@ -215,6 +215,8 @@ int main(int argc, char** argv) {
 		destructSequence(space, sequence);
 
 		FREEMEMORY(space, matches);
+
+		logger_info("Done:\t %u%", ((float )i / (float )noofqueries * 100.0));
 	}
 
 	/*final cleanup*/

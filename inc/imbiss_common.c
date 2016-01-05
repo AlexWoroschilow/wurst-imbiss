@@ -16,6 +16,7 @@
 #include "intsequence.h"
 #include "wurstimbiss.h"
 #include "depictseqs.h"
+#include "logger.h"
 
 /**
  * Build a output string with all parameters
@@ -70,7 +71,9 @@ const char * allscores_string(char * picture, IntSequence *sequence_a, IntSequen
  */
 int allscores_wurst(void *space, IntSequence *sequence_a, Matchtype *matchtype, IntSequence **sequences, Uint len,
 		Uint match, void *info) {
+	time_t time_start, time_end;
 	imbissinfo *imbiss = (imbissinfo*) info;
+	massert((imbiss != NULL), "Imbiss info object can not be null");
 
 	if (matchtype->count <= imbiss->minimal_seed) {
 		return 0;
@@ -84,8 +87,12 @@ int allscores_wurst(void *space, IntSequence *sequence_a, Matchtype *matchtype, 
 	char *picture = depictSequence(space, len, 20, matchtype->pos, matchtype->count, '*');
 	massert((picture != NULL), "Picture object can not be null");
 
+	time(&time_start);
 	struct salami_info *salami = alignment_wurst(info, space, matchtype, sequences, len, imbiss->query);
 	massert((salami != NULL), "Salami alignment object can not be null");
+	time(&time_end);
+
+	logger_info("Time:\t alignment_wurst in %f sec", difftime(time_end, time_start));
 
 	printf("CSV;%s\n", allscores_string(picture, sequence_a, sequence_b, matchtype, salami));
 
@@ -108,6 +115,7 @@ int allscores_wurst(void *space, IntSequence *sequence_a, Matchtype *matchtype, 
 int allscores_aacid(void *space, IntSequence *sequence_a, Matchtype *matchtype, IntSequence **sequences, Uint len,
 		Uint match, void *info) {
 
+	time_t time_start, time_end;
 	imbissinfo *imbiss = (imbissinfo*) info;
 	massert((imbiss != NULL), "Imbiss info object can not be null");
 
@@ -124,8 +132,12 @@ int allscores_aacid(void *space, IntSequence *sequence_a, Matchtype *matchtype, 
 	char *picture = depictSequence(space, len, 20, matchtype->pos, matchtype->count, '*');
 	massert((picture != NULL), "Picture object can not be null");
 
+	time(&time_start);
 	struct salami_info *salami = alignment_aacid(info, space, matchtype, sequences, len, imbiss->query);
 	massert((salami != NULL), "Salami alignment object can not be null");
+	time(&time_end);
+
+	logger_info("Time:\t allscores_aacid in %f sec", difftime(time_end, time_start));
 
 	printf("CSV;%s\n", allscores_string(picture, sequence_a, sequence_b, matchtype, salami));
 

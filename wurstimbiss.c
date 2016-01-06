@@ -213,7 +213,7 @@ int main(int argc, char** argv) {
 				depictsw //
 				);
 		time(&time_end);
-		logger_info("Time:\t rank of suffix match in %f sec", difftime(time_end, time_start));
+		logger_info("Time:\t suffix match rank in %f sec", difftime(time_end, time_start));
 
 		destructSequence(space, sequence);
 

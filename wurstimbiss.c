@@ -80,7 +80,7 @@ int main(int argc, char** argv) {
 	Config *cfg = NULL;
 	double *scores = NULL;
 	int swscores[2] = { 3, -2 };
-	time_t time_start, time_end;
+	time_t time_start, time_end, time_left_start, time_left_end;
 
 	imbissinfo *imbiss = ALLOCMEMORY(space, NULL, (*imbiss), 1);
 	massert((imbiss != NULL), "Imbissinfo object can not be null");
@@ -160,6 +160,8 @@ int main(int argc, char** argv) {
 	massert((queries != NULL), "Queries collection can not be empty");
 
 	printf("CSV;%s\n", allscores_string(NULL, NULL, NULL, NULL, NULL));
+
+	time(&time_left_start);
 	for (i = 0; i < noofqueries; i++) {
 
 		/*get query form batchfile*/
@@ -215,13 +217,19 @@ int main(int argc, char** argv) {
 				depictsw //
 				);
 		time(&time_end);
+		time(&time_left_end);
+
+		const double percent = ((float) (i + 1) / (float) noofqueries * 100.0);
+		const double time_left_diff = difftime(time_left_end, time_left_start);
+		const double time_left = ((time_left_diff / percent) * 100) - ((time_left_diff * 100) / percent);
+
 		logger_info("Time:\t suffix match rank in %f sec", difftime(time_end, time_start));
 
 		destructSequence(space, sequence);
 
 		FREEMEMORY(space, matches);
 
-		logger_info("Done:\t %f %%", ((float )(i + 1) / (float )noofqueries * 100.0));
+		logger_info("Done:\t %f %%, time left %f min", percent, (time_left/60));
 	}
 
 	/*final cleanup*/

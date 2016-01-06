@@ -217,22 +217,17 @@ int main(int argc, char** argv) {
 				depictsw //
 				);
 		time(&time_end);
+		time(&time_left_end);
 
 		const double percent = ((float) (i + 1) / (float) noofqueries * 100.0);
-
-		time(&time_left_end);
 		const double time_left_diff = difftime(time_left_end, time_left_start);
 		const double time_left_total = (float) time_left_diff / (float) percent * 100.0;
 
-		//const double time_left = ((time_left_diff / percent) * 100) - ((time_left_diff * 100) / percent);
-
-		logger_info("Time:\t suffix match rank in %f sec", difftime(time_end, time_start));
-
 		destructSequence(space, sequence);
-
 		FREEMEMORY(space, matches);
 
-		logger_info("Done:\t %f %%, time left %f min", percent, (time_left_total / 60));
+		logger_info("Time:\t suffix match rank in %f sec", difftime(time_end, time_start));
+		logger_info("Done:\t %f %%, time left %f min", percent, (time_left_total-time_left_diff )/60);
 	}
 
 	/*final cleanup*/

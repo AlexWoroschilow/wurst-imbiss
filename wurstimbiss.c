@@ -219,7 +219,7 @@ int main(int argc, char** argv) {
 
 		FREEMEMORY(space, matches);
 
-		logger_info("Done:\t %u%", ((float )i / (float )noofqueries * 100.0));
+		logger_info("Done:\t %f %", ((float )i / (float )noofqueries * 100.0));
 	}
 
 	/*final cleanup*/

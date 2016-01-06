@@ -17,5 +17,6 @@
  void sortMapdomain(void *, FAlphabet *);
  void dumpAlphabet(FAlphabet*); 
 
+ FAlphabet* alphabet_load_csv(void *space, char* filename);
 
  #endif

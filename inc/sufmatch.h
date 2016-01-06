@@ -1,4 +1,3 @@
-
 #ifndef SUF_MATCH
 #define SUF_MATCH
 
@@ -13,10 +12,10 @@
  *
  */
 
- #include "basic-types.h"
- #include "intsequence.h"
- #include "sufmatch.h"
- #include "sufarray.h" 
+#include "basic-types.h"
+#include "intsequence.h"
+#include "sufmatch.h"
+#include "sufarray.h"
 
 typedef struct {
 	Uint id;
@@ -29,76 +28,37 @@ typedef struct {
 	double blast;
 } Matchtype;
 
-PairSint* sufSubstring (void *, Suffixarray *, Uint *, Uint, Uint);
-void reportSufmatch    (Suffixarray *, PairSint *, Uint, Uint, 
-						IntSequence **);
-
+PairSint* sufSubstring(void *, Suffixarray *, Uint *, Uint, Uint);
+void reportSufmatch(Suffixarray *, PairSint *, Uint, Uint, IntSequence **);
 
 void
-rankSufmatch ( 	void *space, 
-				Suffixarray *suffix_array,
-				PairSint *matches, 
-				Uint len, 
-				Uint maxmatches, 
-				Uint substrlen,
-				IntSequence **s,
-				Uint noofseqs,
-				double (*filter)(		void *,
-				  					Matchtype *, 
-									IntSequence *, 
-									IntSequence *, 
-	  				        		Uint *, 
-									Uint, 
-									Uint, 
-									void *),
-				Matchtype* (*selector)(	void *,
-				  					Matchtype *, 
-									Uint,
-									IntSequence *,
-									IntSequence **,
-									void *),
-				int (*handler)(	void *, 
-									IntSequence *,
-				  					Matchtype *, 
-									IntSequence **, 
-									Uint, 
-									Uint, 
-									void *), 	
-				IntSequence *sequence_a,
-				void *info, 
-				double *scores, 
-				unsigned char depictsw
-);
+rankSufmatch(void *space, Suffixarray *suffix_array, PairSint *matches, Uint len, Uint maxmatches, Uint substrlen, IntSequence **s,
+		Uint noofseqs,
+		double (*filter)(void *, Matchtype *, IntSequence *, IntSequence *, Uint *, Uint, Uint, void *),
+		Matchtype* (*selector)(void *, Matchtype *, Uint, IntSequence *, IntSequence **, void *),
+		int (*handler)(void *, IntSequence *, Matchtype *, IntSequence **, Uint, Uint, void *), IntSequence *sequence_a, void *info,
+		double *scores, unsigned char depictsw);
 
 Matchtype*
-selectScoreSWconst(void *space, Matchtype *m, Uint k, 
-	IntSequence *a, IntSequence **s, void *info);
- 
-Matchtype*
-selectSW (void *space, Matchtype *m, Uint k, IntSequence *a, 
-		IntSequence **s, void* info);
+selectScoreSWconst(void *space, Matchtype *m, Uint k, IntSequence *a, IntSequence **s, void *info);
 
 Matchtype*
-selectScore (void *space, Matchtype *m, Uint k, IntSequence *a, 
-		IntSequence **s, void* info);
+selectSW(void *space, Matchtype *m, Uint k, IntSequence *a, IntSequence **s, void* info);
+
+Matchtype*
+selectScore(void *space, Matchtype *m, Uint k, IntSequence *a, IntSequence **s, void* info);
 
 double
-swconstfilter(void *space, Matchtype *m, IntSequence *a, IntSequence *b,
-					Uint *ptr, Uint len, Uint pos, void *info); 
+swconstfilter(void *space, Matchtype *m, IntSequence *a, IntSequence *b, Uint *ptr, Uint len, Uint pos, void *info);
 
 double
-scorefilter(void *space, Matchtype *m, IntSequence *a, IntSequence *b,
-					Uint *ptr, Uint len, Uint pos, void *info);
-
+scorefilter(void *space, Matchtype *m, IntSequence *a, IntSequence *b, Uint *ptr, Uint len, Uint pos, void *info);
 
 Matchtype*
-selectBlastScore (void *space, Matchtype *m, Uint k, 
-		IntSequence *a, IntSequence **s, void* info);
-
+selectBlastScore(void *space, Matchtype *m, Uint k, IntSequence *a, IntSequence **s, void* info);
 
 Matchtype*
-selectBlastScoreSWconst(void *space, Matchtype *m, Uint k, 
-			IntSequence *a, IntSequence **s, void *info); 
+selectBlastScoreSWconst(void *space, Matchtype *m, Uint k, IntSequence *a, IntSequence **s, void *info);
 
 #endif
 

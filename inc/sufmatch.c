@@ -34,13 +34,7 @@
  */
 
 int suffixscore(symtype a, symtype b, void* info) {
-	double* scores;
-
-	scores = (double*) info;
-	if (a == b)
-		return 3;
-
-	return -2;
+	return (a == b) ? 3 : -2;
 }
 
 /*------------------------------- sufSubstring -------------------------------
@@ -212,38 +206,6 @@ void freeMatchtype(void *space, void *data) {
 	FREEMEMORY(space, data);
 }
 
-/*---------------------------------- subscr ----------------------------------
- *    
- * a function that assigns scores from a substitution matrix for matches 
- * and mismatches given in info matrix
- * 
- */
-
-int subscr(symtype a, symtype b, void *info) {
-	double* M;
-	FAlphabet *alphabet;
-	imbissinfo *p;
-	int val;
-
-	p = (imbissinfo*) info;
-	alphabet = p->alphabet;
-	M = (double*) p->sub;
-
-	/*	ad = alphabet->mapdomain[(Uint)a];
-	 bd = alphabet->mapdomain[(Uint)b];
-	 printf("decoding %d and %d", ad, bd);
-	 tupela = decodeCantor(NULL, ad, 2);
-	 tupelb = decodeCantor(NULL, bd, 2);
-	 printf("... ended ... to %d and %d \n", VECTOR(tupela,0), VECTOR(tupelb,0));
-	 val =  MATRIX2D(M, 309, VECTOR(tupela, 0), VECTOR(tupelb,0));
-	 */
-	val = MATRIX2D(M, 308, a, b);
-	if (val < -10)
-		val = -10;
-
-	return val;
-}
-
 /*-------------------------------- getEntropy --------------------------------
  *    
  * calculates the entropy of a sequence, given probabilities.
@@ -303,10 +265,9 @@ Matchtype* selectBlastScoreSWconst(void *space, Matchtype *m, Uint k, IntSequenc
 	for (i = k; i > 0 && l < 1000; i--) {
 		if (m[i - 1].count >= imbiss->minimal_seed) {
 
-			swres = swgapless(space, a->sequence, a->length, s[m[i - 1].id]->sequence, s[m[i - 1].id]->length, constscr,
-					imbiss->swscores
-					/*subscr, info*/
-					);
+			swres = swgapless(space, a->sequence, a->length, s[m[i - 1].id]->sequence, s[m[i - 1].id]->length, constscr, imbiss->swscores
+			/*subscr, info*/
+			);
 
 			m[i - 1].swscore = swres[arraymax(swres, (a->length + 1) * (s[m[i - 1].id]->length + 1))];
 
@@ -335,10 +296,9 @@ Matchtype* selectScoreSWconst(void *space, Matchtype *m, Uint k, IntSequence *a,
 	for (i = k; i > 0 && l < 1000; i--) {
 		if (m[i - 1].count >= imbiss->minimal_seed) {
 
-			swres = swgapless(space, a->sequence, a->length, s[m[i - 1].id]->sequence, s[m[i - 1].id]->length, constscr,
-					imbiss->swscores
-					/*subscr, info*/
-					);
+			swres = swgapless(space, a->sequence, a->length, s[m[i - 1].id]->sequence, s[m[i - 1].id]->length, constscr, imbiss->swscores
+			/*subscr, info*/
+			);
 
 			m[i - 1].swscore = swres[arraymax(swres, (a->length + 1) * (s[m[i - 1].id]->length + 1))];
 
@@ -398,8 +358,7 @@ double scorefilter(void *space, Matchtype *m, IntSequence *a, IntSequence *b, Ui
 	return sum > 0 ? sum : 0;
 }
 
-double swconstfilter(void *space, Matchtype *match, IntSequence *a, IntSequence *b, Uint *ptr, Uint len, Uint pos,
-		void *info) {
+double swconstfilter(void *space, Matchtype *match, IntSequence *a, IntSequence *b, Uint *ptr, Uint len, Uint pos, void *info) {
 
 	int *swres = NULL;
 	imbissinfo *imbiss = NULL;
@@ -460,7 +419,6 @@ void rankSufmatch(void *space, Suffixarray *suffix_array, PairSint *matches, Uin
 	Matchtype *selected = NULL;
 	int *hash_table = NULL;
 	int i = 0, j = 0, k = 0;
-	double t;
 
 	hash_table = ALLOCMEMORY(space, NULL, int, (noofseqs + 1));
 	memset(hash_table, -1, sizeof(int) * (noofseqs + 1));
@@ -492,7 +450,7 @@ void rankSufmatch(void *space, Suffixarray *suffix_array, PairSint *matches, Uin
 			}
 
 			ptr = (suffix_array->suffixptr[suffix_array->suftab[j]]);
-			const IntSequence * sequence_b = sequences[match->id];
+			IntSequence * sequence_b = (IntSequence *) sequences[match->id];
 
 			massert((info != NULL), "Info can not be null");
 			massert((sequence_a != NULL), "Sequence a can not be null");
@@ -513,7 +471,7 @@ void rankSufmatch(void *space, Suffixarray *suffix_array, PairSint *matches, Uin
 	int length = 0;
 	int response = 0;
 	for (i = k; i > 0; i--) {
-		const Matchtype * match = &selected[i - 1];
+		Matchtype *match = (Matchtype *) &selected[i - 1];
 		if ((response = handler(space, sequence_a, match, sequences, len, length, info))) {
 			length++;
 		}

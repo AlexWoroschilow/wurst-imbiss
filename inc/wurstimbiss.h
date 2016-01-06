@@ -54,7 +54,7 @@ typedef struct {
 	FAlphabet *alphabet;
 	stringset_t *query;
 	Uint *consensus;
-	struct score_mat * matrix_substitition;
+	struct sub_mat * matrix_substitition;
 
 	double lambda;
 	double H;

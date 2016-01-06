@@ -22,7 +22,7 @@
  * Build a output string with all parameters
  * this string should be a result of  work of this program
  */
-const char * allscores_string(char * picture, IntSequence *sequence_a, IntSequence *sequence_b, Matchtype *matchtype,
+const char * allscores_string(char * picture, IntSequence *sequence_a, IntSequence *sequence_b, const Matchtype *matchtype,
 		struct salami_info *salami) {
 	char * response;
 
@@ -69,7 +69,7 @@ const char * allscores_string(char * picture, IntSequence *sequence_a, IntSequen
  * stop (-1) or proceed (0) reporting matches.
  *
  */
-int allscores_wurst(void *space, IntSequence *sequence_a, Matchtype *matchtype, IntSequence **sequences, Uint len,
+int allscores_wurst(void *space, IntSequence *sequence_a, const Matchtype *matchtype, IntSequence **sequences, Uint len,
 		Uint match, void *info) {
 	time_t time_start, time_end;
 	imbissinfo *imbiss = (imbissinfo*) info;

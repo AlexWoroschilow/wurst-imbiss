@@ -63,6 +63,8 @@
 #include "coord.h"
 #include "align_i.h"
 #include "matrix.h"
+#include "read_mat.h"
+
 #include "model.h"
 #include "cmp_dmat_i.h"
 #include "altscores.h"
@@ -219,7 +221,7 @@ int main(int argc, char** argv) {
 
 		FREEMEMORY(space, matches);
 
-		logger_info("Done:\t %f %", ((float )i / (float )noofqueries * 100.0));
+		logger_info("Done:\t %f %%", ((float )i / (float )noofqueries * 100.0));
 	}
 
 	/*final cleanup*/

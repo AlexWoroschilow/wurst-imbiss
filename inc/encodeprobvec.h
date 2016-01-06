@@ -10,6 +10,7 @@
  *
  */
 
+ #include "prob_vec.h"
  #include "intsequence.h"
  #include "falphabet.h"
 

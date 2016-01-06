@@ -14,7 +14,7 @@ char * merge(const char * string1, const char * string2) {
 	Uint string1_length = strlen(string1);
 	Uint string2_length = strlen(string2);
 	char *response = malloc(string1_length + string2_length + 1);
-	sprintf(response, "%s%s\0", string1, string2);
+	sprintf(response, "%s%s%s", string1, string2, "\0");
 	return response;
 }
 

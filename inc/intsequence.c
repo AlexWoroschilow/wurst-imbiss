@@ -229,7 +229,6 @@ void dumpSequence(IntSequence *s) {
  */
 
 IntSequence* loadSequence(void *space, char *filename) {
-	long size;
 	FILE *infile;
 	Uint *sequence, *info;
 	IntSequence *s;
@@ -239,12 +238,9 @@ IntSequence* loadSequence(void *space, char *filename) {
 		fprintf( stderr, "couldn't open file '%s'; %s\n", filename, strerror(errno));
 		exit(EXIT_FAILURE);
 	}
-	fseek(infile, 0, SEEK_END);
-	size = ftell(infile);
-	rewind(infile);
 
 	s = initSequence(space);
-	fread(s, sizeof(IntSequence), 1, infile);
+	massert(fread(s, sizeof(IntSequence), 1, infile), "Can not read sequence input file");
 
 	s->description = ALLOCMEMORY(space, NULL, char, s->descrlen + 1);
 	s->alphabetname = ALLOCMEMORY(space, NULL, char, s->namelen + 1);
@@ -252,11 +248,11 @@ IntSequence* loadSequence(void *space, char *filename) {
 	sequence = ALLOCMEMORY(space, NULL, Uint, s->length);
 	info = ALLOCMEMORY(space, NULL, Uint, s->length);
 
-	fread(s->description, sizeof(char), s->descrlen + 1, infile);
-	fread(s->alphabetname, sizeof(char), s->namelen + 1, infile);
-	fread(s->url, sizeof(char), s->urllen + 1, infile);
-	fread(sequence, sizeof(Uint), s->length, infile);
-	fread(info, sizeof(Uint), s->length, infile);
+	massert(fread(s->description, sizeof(char), s->descrlen + 1, infile), "Can not read sequence description");
+	massert(fread(s->alphabetname, sizeof(char), s->namelen + 1, infile), "Can not read sequence alphabet name");
+	massert(fread(s->url, sizeof(char), s->urllen + 1, infile), "Can not read sequence url");
+	massert(fread(sequence, sizeof(Uint), s->length, infile), "Can not read sequence");
+	massert(fread(info, sizeof(Uint), s->length, infile), "Can not read sequence info");
 
 	s->sequence = sequence;
 	s->info = info;
@@ -379,7 +375,7 @@ IntSequence ** sequence_load_csv(void *imbiss, void *space, char* filename, char
 	IntSequence ** sequences = ALLOCMEMORY(space, NULL, IntSequence *, *linecount);
 	for (i = 0; i < *linecount; i++) {
 		const char * file = (const char *) SETSTR(fn[i], 0);
-		sequences[i] = loader(imbiss, space, file);
+		sequences[i] = loader(imbiss, space, (char *) file);
 	}
 
 	for (i = 0; i < *linecount; i++) {
@@ -430,7 +426,6 @@ Uint * sequence_salami_to_uint(struct salami_sequence * sequence) {
 
 char * sequence_code(char *url) {
 	int i;
-	char * response;
 	Uint length = (strlen(url) - 1);
 	for (i = length; i >= 0; i--) {
 		if (url[i - 1] == '/') {
@@ -441,28 +436,23 @@ char * sequence_code(char *url) {
 }
 
 IntSequence* sequence_aacid_load(void *imbiss, void *space, char *filename) {
-	long size;
 	FILE *infile;
 
 	massert(((infile = fopen(filename, "r"))!= NULL), "Couldn't open file");
 
-	fseek(infile, 0, SEEK_END);
-	size = ftell(infile);
-	rewind(infile);
-
 	IntSequence *sequence = sequence_init(space);
-	fread(sequence, sizeof(*sequence), 1, infile);
+	massert(fread(sequence, sizeof(*sequence), 1, infile), "Can not read sequence input file");
 
 	sequence->description = ALLOCMEMORY(space, NULL, char, sequence->descrlen + 1);
 	sequence->alphabetname = ALLOCMEMORY(space, NULL, char, sequence->namelen + 1);
 	sequence->url = ALLOCMEMORY(space, NULL, char, sequence->urllen + 1);
 
-	fread(sequence->description, sizeof(char), sequence->descrlen + 1, infile);
-	fread(sequence->alphabetname, sizeof(char), sequence->namelen + 1, infile);
-	fread(sequence->url, sizeof(char), sequence->urllen + 1, infile);
+	massert(fread(sequence->description, sizeof(char), sequence->descrlen + 1, infile), "Can not read sequence description");
+	massert(fread(sequence->alphabetname, sizeof(char), sequence->namelen + 1, infile), "Can not read sequence alphabet name");
+	massert(fread(sequence->url, sizeof(char), sequence->urllen + 1, infile), "Can not read sequence url");
 
 	Uint *info = ALLOCMEMORY(space, NULL, Uint, sequence->length);
-	fread(info, sizeof(Uint), sequence->length, infile);
+	massert(fread(info, sizeof(Uint), sequence->length, infile), "Can not read sequence file");
 
 	struct salami_sequence * sequence_salami = salami_sequence_string(imbiss, sequence);
 	massert((sequence_salami != NULL), "Salami sequence can not be null");

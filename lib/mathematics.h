@@ -93,5 +93,5 @@ double BLAST_Expm1(double x);
 Uint fak(Uint);
 double* coldel (void *, double *, Uint, Uint, Uint);
 double* rowdel (void *, double *, Uint, Uint, Uint);
-inline Uint minvecdist(void *space, vector_t *vec, Uint i, Uint j);
+Uint minvecdist(void *space, vector_t *vec, Uint i, Uint j);
 #endif

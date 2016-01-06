@@ -35,11 +35,9 @@ void normalize_alt_scores(float *scrs, int len, float *mean, float *dev);
 float* get_alt_scores(void *space, int num_scrs, struct score_mat *matrix, struct pair_set *set);
 float get_dme_thresh(struct pair_set *set, struct coord *a, struct coord *b);
 struct score_struct* get_scores(void *space, struct pair_set *set, struct coord *a, struct coord *b, void *to_use);
-struct salami_info*
-doWurstAlignment(void *space, Matchtype *m, IntSequence **s, int len, void *info);
 
 struct salami_sequence * salami_sequence_string(void *imbiss, IntSequence *sequence);
 void salami_sequence_dump(struct salami_sequence * sequence);
-struct salami_info* alignment_aacid(void *imbiss, void *space, Matchtype *match, IntSequence **s, int len, void *info);
-struct salami_info* alignment_wurst(void *config, void *space, Matchtype *matchtype, IntSequence **sequences, int len, void *info);
+struct salami_info* alignment_aacid(void *imbiss, void *space, const Matchtype *match, IntSequence **s, int len, void *info);
+struct salami_info* alignment_wurst(void *config, void *space, const Matchtype *matchtype, IntSequence **sequences, int len, void *info);
 #endif

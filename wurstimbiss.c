@@ -227,7 +227,7 @@ int main(int argc, char** argv) {
 		FREEMEMORY(space, matches);
 
 		logger_info("Time:\t suffix match rank in %f sec", difftime(time_end, time_start));
-		logger_info("Done:\t %f %%, time left %f min", percent, (time_left_total-time_left_diff )/60);
+		logger_info("Done:\t %f %%, %f min left", percent, (time_left_total-time_left_diff )/60);
 	}
 
 	/*final cleanup*/

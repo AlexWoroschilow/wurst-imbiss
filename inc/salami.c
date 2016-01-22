@@ -287,7 +287,7 @@ struct salami_info* alignment_wurst(void *config, void *space, const Matchtype *
 	id = get_seq_id_simple(set_nw, seq_a, seq_b);
 	scores = get_scores(space, set_nw, coord_a, coord_b, NULL);
 
-	salami->id = (float) id / set_nw->n;
+	salami->id = (float)id / (float)set_nw->n;
 	salami->nw_score = set_nw->score;
 	salami->nw_smpl_score = set_nw->smpl_score;
 	salami->nw_score_tot = scores->scr_tot;
@@ -390,10 +390,12 @@ struct salami_info* alignment_aacid(void *config, void *space, const Matchtype *
 	struct pair_set *pair_set_nw = score_mat_sum_full(&crap, matrix_score, gap_open, gap_widen, gap_open, gap_widen,
 	NULL, NULL, S_AND_W, NULL);
 
+
+	struct triplet seq_id = get_seq_id(pair_set_nw, seq_a, seq_b);
 	unsigned id = get_seq_id_simple(pair_set_nw, seq_a, seq_b);
 	struct score_struct *scores = get_scores(space, pair_set_nw, coord_a, coord_b, NULL);
 
-	salami->id = (float) (id / pair_set_nw->n);
+	salami->id = (float)id / (float)pair_set_nw->n;
 	salami->nw_score = pair_set_nw->score;
 	salami->nw_smpl_score = pair_set_nw->smpl_score;
 	salami->nw_score_tot = scores->scr_tot;

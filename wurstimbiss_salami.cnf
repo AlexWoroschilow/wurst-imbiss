@@ -1,0 +1,53 @@
+[common]
+# Types: salami, aacid
+type=salami
+
+[sources]
+# List with sequences to process
+structlist=/home/stud2013/ovoroshylov/Clustering/wurst-imbiss/var/seq/seq_all.list
+
+# List with all sequences you can find
+sequencelist=/home/stud2013/ovoroshylov/Clustering/wurst-imbiss/var/seq/seq_all.list
+
+# Subsitution matrix to calculate a similarity
+substitution=/home/stud2013/ovoroshylov/Clustering/wurst-imbiss/vendor/wurst/matrix/blosum62.mat
+
+# Custom alphabet from Steve Hoffmann
+# i have no idea how it should looks like 
+alphabet=/home/stud2013/ovoroshylov/Clustering/wurst-imbiss/var/abc/alphabet_t500
+
+# Configuration file for logger library
+# i use a zlog, so you can just read a documatation
+# for zlog in internet, google is your friend 
+logger=/home/stud2013/ovoroshylov/Clustering/wurst-imbiss/wurstimbiss_salami_logger.cnf
+
+# Path where a binary files are stored
+binarypath=/work/public/no_backup/bm/pdb_all_bin
+
+# Path where a vector 
+# files are stored
+vectorpath=/work/public/no_backup/bm/pdb_all_vec_6mer_struct
+
+# Path to pdb structires 
+# files are stored
+pdbpath=/work/public/no_backup/bm/
+
+[limits]
+# Minimal length of structure
+# it is a same for structural sequences and 
+# for amino-acid sequences (15), 
+minimal_length=25
+
+# Process only matches with 
+# minimal count of seeds
+# like here (5)
+minimal_seed=2
+
+# Process maximal maximal_hit results from 
+# suffix array matches, matches are sorted by 
+# some score, so a best matches are always on top
+maximal_hits=50
+
+# How many matches from suffix array we 
+# want to have 
+maximal_match=10000

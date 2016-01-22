@@ -1,0 +1,4 @@
+[formats]
+simple = "%d - %v: %m%n"
+[rules]
+wurstimbiss.DEBUG "/home/stud2013/ovoroshylov/Clustering/wurst-imbiss/wurstimbiss_salami.log"

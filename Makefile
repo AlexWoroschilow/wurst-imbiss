@@ -1,6 +1,6 @@
 CC=gcc
 LD=${CC} 
-CFLAGS= -O3 -g -DDONT_SEE_RCS -Wall -I./inc/ -I./vendor/cini/include/ -I./vendor/zlog/include/  -I./vendor/gnuplot/src/ -I./lib/ -I./vendor/wurst/src/wurstsrc/ -L./vendor/zlog/lib/ -L./vendor/cini/lib/ -L./vendor/wurst/src/wurstsrc/ -L./inc/ -L./lib/  
+CFLAGS= -O3 -DDONT_SEE_RCS -Wall -I./inc/ -I./vendor/cini/include/ -I./vendor/zlog/include/  -I./vendor/gnuplot/src/ -I./lib/ -I./vendor/wurst/src/wurstsrc/ -L./vendor/zlog/lib/ -L./vendor/cini/lib/ -L./vendor/wurst/src/wurstsrc/ -L./inc/ -L./lib/  
 LDFLAGS= -lm -lwurst -lc -lpthread  -lzlog -lconfigini
 CTAGS=ctags > tags
 LIBS=-lob

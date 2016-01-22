@@ -1,0 +1,6 @@
+#!/bin/sh
+TIMESTAMP=$(date +"%s")
+ROOT="/home/stud2013/ovoroshylov/Clustering/wurst-imbiss"
+export LD_LIBRARY_PATH=${ROOT}/vendor/zlog/lib:$LD_LIBRARY_PATH
+${ROOT}/wurstimbiss.x -c ${ROOT}/wurstimbiss_aacid.cnf > out/wurstimibiss_aacid_${TIMESTAMP}.csv
+

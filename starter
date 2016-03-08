@@ -1,0 +1,52 @@
+#!/usr/bin/perl
+# Copyright 2015 Alex Woroschilow (alex.woroschilow@gmail.com)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+use strict;
+use warnings;
+
+use FindBin;
+use lib "$FindBin::Bin/lib/perl";
+use Config::Simple;
+use ZBH::SGE;
+
+
+sub main ($ $ $ $) {
+
+	my $logfile1 = shift;
+	my $starter1 = shift;
+	my $logfile2 = shift;
+	my $starter2 = shift;
+
+	return 0 if ( 
+		ZBH::SGE::is_background_process_sge($starter1)
+		|| ZBH::SGE::is_background_process_sge($starter2)
+	);
+
+	unlink($logfile1);
+	unlink($logfile2);
+	
+	system("qsub -S /bin/bash -wd $FindBin::Bin $starter1");
+	system("qsub -S /bin/bash -wd $FindBin::Bin $starter2");
+
+	return 0;
+}
+
+exit(
+	print(
+		main(
+			"$FindBin::Bin/log/sequence.log",
+			"$FindBin::Bin/bin/sequence.sh",
+			"$FindBin::Bin/log/structure.log",
+			"$FindBin::Bin/bin/structure.sh"
+		)
+	)
+);

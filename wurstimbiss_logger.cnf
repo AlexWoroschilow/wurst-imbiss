@@ -1,4 +1,0 @@
-[formats]
-simple = "%d - %v: %m%n"
-[rules]
-wurstimbiss.DEBUG    >stdout; simple

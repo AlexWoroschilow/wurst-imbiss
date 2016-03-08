@@ -19,7 +19,7 @@ alphabet=/home/other/wurst/wurst-background/projects/wurst-imbiss/var/abc/alphab
 # Configuration file for logger library
 # i use a zlog, so you can just read a documatation
 # for zlog in internet, google is your friend 
-logger=/home/other/wurst/wurst-background/projects/wurst-imbiss/structure_logger.cnf
+logger=/home/other/wurst/wurst-background/projects/wurst-imbiss/etc/structure_logger.cnf
 
 # Path where a binary files are stored
 binarypath=/work/public/no_backup/bm/pdb_all_bin

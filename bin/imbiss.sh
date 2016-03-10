@@ -13,8 +13,8 @@
 #$ -clear
 #$ -q stud.q
 #$ -S /bin/bash
+set -e
 ROOT=$(pwd)
-TIMESTAMP=$(date +"%s")
 echo "working folder: ${ROOT}"
 export LD_LIBRARY_PATH=${ROOT}/vendor/zlog/lib:$LD_LIBRARY_PATH
-${ROOT}/wurstimbiss.x -c ${ROOT}/etc/sequence.cnf > ${ROOT}/out/sequence_${TIMESTAMP}.csv
+${ROOT}/wurstimbiss.x -c $1 > $2

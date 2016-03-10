@@ -2,6 +2,9 @@
 # Types: salami, aacid
 type=aacid
 
+[result]
+output=/home/other/wurst/wurst-background/projects/wurst-imbiss/out/sequence.csv
+
 [sources]
 # List with sequences to process
 structlist=/home/other/wurst/wurst-background/projects/wurst-imbiss/var/seq/seq_all.list

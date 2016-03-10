@@ -18,18 +18,17 @@ use lib "$FindBin::Bin/lib/perl";
 use Config::Simple;
 use ZBH::SGE;
 
-sub main ($ $ $ $) {
+sub main ($ $ $) {
 
+	my $starter = shift;
 	my $logfile1 = shift;
-	my $starter1 = shift;
 	my $logfile2 = shift;
-	my $starter2 = shift;
 
 	# Check is all processes already started
 	# using Sug Grid Engine
-	return ("started")
-	  if ( ZBH::SGE::is_background_process_sge($starter1)
-		|| ZBH::SGE::is_background_process_sge($starter2) );
+	return ("started") if ( 
+		ZBH::SGE::is_background_process_sge($starter)
+	);
 
 	# Try to find 100 % done status
 	# in both logs
@@ -48,10 +47,9 @@ sub main ($ $ $ $) {
 exit(
 	print(
 		main(
+			"$FindBin::Bin/bin/imbiss.sh",
 			"$FindBin::Bin/log/sequence.log",
-			"$FindBin::Bin/bin/sequence.sh",
-			"$FindBin::Bin/log/structure.log",
-			"$FindBin::Bin/bin/structure.sh"
+			"$FindBin::Bin/log/structure.log"
 		)
 	)
 );

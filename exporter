@@ -15,41 +15,44 @@ use warnings;
 
 use FindBin;
 use lib "$FindBin::Bin/lib/perl";
+use File::Copy;
 use Config::Simple;
 use ZBH::SGE;
 
-sub main ($ $ $ $ $) {
+sub main ($ $ $ $) {
 
-	my $starter = shift;
 	my $configfile1 = shift;
 	my $configfile2 = shift;
-	my $logfile1 = shift;
-	my $logfile2 = shift;
+	my $exportfile1 = shift;
+	my $exportfile2 = shift;
+
+	return ("failure")
+	  if ( !defined($exportfile1)
+		|| !defined($exportfile2) );
+
+	return ("failure")
+	  if ( !ZBH::SGE::is_file_exists($configfile1)
+		|| !ZBH::SGE::is_file_exists($configfile2) );
 
 	my $config1 = new Config::Simple($configfile1);
-	my $output1 =  $config1->param( "result.output");
-	
+	my $output1 = $config1->param("result.output");
+
 	my $config2 = new Config::Simple($configfile2);
-	my $output2 =  $config1->param( "result.output");
+	my $output2 = $config2->param("result.output");
 
-	return ("started") if ( ZBH::SGE::is_background_process_sge($starter));
+	copy( $output1, $exportfile1 ) or return ("failure");
+	copy( $output2, $exportfile2 ) or return ("failure");
 
-	unlink($logfile1, $output1, $logfile2, $output2);
-
-	system("qsub -S /bin/bash -wd $FindBin::Bin $starter $configfile1 $output1");
-	system("qsub -S /bin/bash -wd $FindBin::Bin $starter $configfile2 $output2");
-
-	return ("wait");
+	return ("done");
 }
 
 exit(
 	print(
 		main(
-			"$FindBin::Bin/bin/imbiss.sh",
 			"$FindBin::Bin/etc/sequence.cnf",
-			"$FindBin::Bin/etc/structure.cnf",			
-			"$FindBin::Bin/log/sequence.log",
-			"$FindBin::Bin/log/structure.log",
+			"$FindBin::Bin/etc/structure.cnf",
+			$ARGV[0],
+			$ARGV[1],
 		)
 	)
 );

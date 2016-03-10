@@ -30,7 +30,7 @@ sub main ($ $ $ $ $) {
 	my $output1 =  $config1->param( "result.output");
 	
 	my $config2 = new Config::Simple($configfile2);
-	my $output2 =  $config1->param( "result.output");
+	my $output2 =  $config2->param( "result.output");
 
 	return ("started") if ( ZBH::SGE::is_background_process_sge($starter));
 

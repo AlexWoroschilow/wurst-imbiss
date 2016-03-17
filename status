@@ -17,6 +17,7 @@ use FindBin;
 use lib "$FindBin::Bin/lib/perl";
 use Config::Simple;
 use ZBH::SGE;
+use ZBH::Local;
 
 sub main ($ $ $) {
 
@@ -27,7 +28,8 @@ sub main ($ $ $) {
 	# Check is all processes already started
 	# using Sug Grid Engine
 	return ("started") if ( 
-		ZBH::SGE::is_background_process_sge($starter)
+		ZBH::Local::is_background_process($starter)
+		|| ZBH::SGE::is_background_process($starter)
 	);
 
 	# Try to find 100 % done status

@@ -1,0 +1,4 @@
+[formats]
+simple = "%d - %v: %m%n"
+[rules]
+wurstimbiss.DEBUG "/home/other/wurst/wurst-background/projects/wurst-imbiss/log/structure.log"

@@ -1,47 +1,50 @@
 [common]
 # Types: salami, aacid
-type=salami
+type=aacid
+
+[result]
+output=/home/other/wurst/wurst-background/projects/wurst-imbiss/out/sequence.csv
 
 [sources]
 # List with sequences to process
-structlist=./var/pdb/pdb_02_local.lib
+structlist=/home/other/wurst/wurst-background/projects/wurst-imbiss/var/seq/seq_all.list
 
 # List with all sequences you can find
-sequencelist=./var/seq/pdb_02_local.list
+sequencelist=/home/other/wurst/wurst-background/projects/wurst-imbiss/var/seq/seq_all.list
 
 # Subsitution matrix to calculate a similarity
-substitution=./vendor/wurst/matrix/blosum62.mat
+substitution=/home/other/wurst/wurst-background/projects/wurst-imbiss/vendor/wurst/matrix/blosum62.mat
 
 # Custom alphabet from Steve Hoffmann
 # i have no idea how it should looks like 
-alphabet=./var/abc/alphabet_t500
+alphabet=/home/other/wurst/wurst-background/projects/wurst-imbiss/var/abc/alphabet_t500
 
 # Configuration file for logger library
 # i use a zlog, so you can just read a documatation
 # for zlog in internet, google is your friend 
-logger=./logger.cnf
+logger=/home/other/wurst/wurst-background/projects/wurst-imbiss/etc/sequence_logger.cnf
 
 # Path where a binary files are stored
-binarypath=/smallfiles/public/no_backup/bm/pdb_all_bin
+binarypath=/work/public/no_backup/bm/pdb_all_bin
 
 # Path where a vector 
 # files are stored
-vectorpath=/smallfiles/public/no_backup/bm/pdb_all_vec_6mer_struct
+vectorpath=/work/public/no_backup/bm/pdb_all_vec_6mer_struct
 
 # Path to pdb structires 
 # files are stored
-pdbpath=/smallfiles/public/no_backup/bm/
+pdbpath=/work/public/no_backup/bm/
 
 [limits]
 # Minimal length of structure
 # it is a same for structural sequences and 
-# for amino-acid sequences, 
+# for amino-acid sequences (15), 
 minimal_length=15
 
 # Process only matches with 
 # minimal count of seeds
-# like here
-minimal_seed=4
+# like here (2)
+minimal_seed=2
 
 # Process maximal maximal_hit results from 
 # suffix array matches, matches are sorted by 

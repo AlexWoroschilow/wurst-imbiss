@@ -1,0 +1,58 @@
+#!/usr/bin/perl
+# Copyright 2015 Alex Woroschilow (alex.woroschilow@gmail.com)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+use strict;
+use warnings;
+
+use FindBin;
+use lib "$FindBin::Bin/lib/perl";
+use File::Copy;
+use Config::Simple;
+use ZBH::SGE;
+
+sub main ($ $ $ $) {
+
+	my $configfile1 = shift;
+	my $configfile2 = shift;
+	my $exportfile1 = shift;
+	my $exportfile2 = shift;
+
+	return ("failure")
+	  if ( !defined($exportfile1)
+		|| !defined($exportfile2) );
+
+	return ("failure")
+	  if ( !ZBH::SGE::is_file_exists($configfile1)
+		|| !ZBH::SGE::is_file_exists($configfile2) );
+
+	my $config1 = new Config::Simple($configfile1);
+	my $output1 = $config1->param("result.output");
+
+	my $config2 = new Config::Simple($configfile2);
+	my $output2 = $config2->param("result.output");
+
+	copy( $output1, $exportfile1 ) or return ("failure");
+	copy( $output2, $exportfile2 ) or return ("failure");
+
+	return ("done");
+}
+
+exit(
+	print(
+		main(
+			"$FindBin::Bin/etc/sequence.cnf",
+			"$FindBin::Bin/etc/structure.cnf",
+			$ARGV[0],
+			$ARGV[1],
+		)
+	)
+);

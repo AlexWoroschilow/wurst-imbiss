@@ -1,0 +1,13 @@
+2016-03-08 18:25:44 INFO [26291:wurstimbiss.c:121] File:	 type aacid
+2016-03-08 18:25:44 INFO [26291:wurstimbiss.c:122] File:	 configuration /home/other/wurst/wurst-background/projects/wurst-imbiss/etc/sequence.cnf
+2016-03-08 18:25:44 INFO [26291:wurstimbiss.c:123] File:	 configuration for logger/home/other/wurst/wurst-background/projects/wurst-imbiss/etc/sequence_logger.cnf
+2016-03-08 18:25:44 INFO [26291:wurstimbiss.c:124] File:	 alphabet /home/other/wurst/wurst-background/projects/wurst-imbiss/var/abc/alphabet_t500
+2016-03-08 18:25:44 INFO [26291:wurstimbiss.c:125] File:	 sequences /home/other/wurst/wurst-background/projects/wurst-imbiss/var/seq/seq_all.list
+2016-03-08 18:25:44 INFO [26291:wurstimbiss.c:126] File:	 structures /home/other/wurst/wurst-background/projects/wurst-imbiss/var/seq/seq_all.list
+2016-03-08 18:25:44 INFO [26291:wurstimbiss.c:127] File:	 substitution matrix /home/other/wurst/wurst-background/projects/wurst-imbiss/vendor/wurst/matrix/blosum62.mat
+2016-03-08 18:25:44 INFO [26291:wurstimbiss.c:128] Max:	 10000 matches from suffix array
+2016-03-08 18:25:44 INFO [26291:wurstimbiss.c:129] Min:	 15 characters
+2016-03-08 18:25:44 INFO [26291:wurstimbiss.c:130] Min:	 2 seeds
+2016-03-08 18:25:44 INFO [26291:wurstimbiss.c:132] Load:	/home/other/wurst/wurst-background/projects/wurst-imbiss/vendor/wurst/matrix/blosum62.mat
+2016-03-08 18:25:44 INFO [26291:wurstimbiss.c:136] Load:	/home/other/wurst/wurst-background/projects/wurst-imbiss/var/abc/alphabet_t500
+2016-03-08 18:25:44 INFO [26291:wurstimbiss.c:141] Load:	/home/other/wurst/wurst-background/projects/wurst-imbiss/var/seq/seq_all.list

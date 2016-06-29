@@ -289,6 +289,7 @@ struct salami_info* alignment_wurst(void *config, void *space, const Matchtype *
 
 	salami->id = (float)id / (float)set_nw->n;
 	salami->nw_score = set_nw->score;
+	salami->nw_length = (Uint)set_nw->n;
 	salami->nw_smpl_score = set_nw->smpl_score;
 	salami->nw_score_tot = scores->scr_tot;
 	salami->nw_cvr = scores->cvr;
@@ -306,6 +307,7 @@ struct salami_info* alignment_wurst(void *config, void *space, const Matchtype *
 	scores = get_scores(space, set_sw, coord_a, coord_b, NULL);
 
 	salami->sw_score = set_sw->score;
+	salami->sw_length = (Uint)set_sw->n;
 	salami->sw_smpl_score = set_sw->smpl_score;
 	salami->sw_score_tot = scores->scr_tot;
 	salami->sw_cvr = scores->cvr;
@@ -395,6 +397,7 @@ struct salami_info* alignment_aacid(void *config, void *space, const Matchtype *
 
 	salami->id = (float)id / (float)pair_set_nw->n;
 	salami->nw_score = pair_set_nw->score;
+	salami->nw_length = (Uint)pair_set_nw->n;
 	salami->nw_smpl_score = pair_set_nw->smpl_score;
 	salami->nw_score_tot = scores->scr_tot;
 	salami->nw_cvr = scores->cvr;
@@ -412,6 +415,7 @@ struct salami_info* alignment_aacid(void *config, void *space, const Matchtype *
 	scores = get_scores(space, pair_set_sw, coord_a, coord_b, NULL);
 
 	salami->sw_score = pair_set_sw->score;
+	salami->sw_length = (Uint)pair_set_sw->n;
 	salami->sw_smpl_score = pair_set_sw->smpl_score;
 	salami->sw_score_tot = scores->scr_tot;
 	salami->sw_cvr = scores->cvr;

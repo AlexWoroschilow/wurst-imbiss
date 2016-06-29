@@ -29,7 +29,7 @@ const char * allscores_string(char * picture, IntSequence *sequence_a, IntSequen
 	if (picture == NULL && sequence_a == NULL && sequence_b == NULL && matchtype == NULL && salami == NULL) {
 		return "picture;sequence a;sequence b;tm_score;andrew_score;matches;matches_score;matches_swscore;"
 				"matches_blast;salami_id;salami_sw_score;salami_sw_smpl_score;salami_sw_score_tot;salami_sw_cvr;"
-				"salami_sw_raw;salami_frac_dme;salami_z_scr;salami_rmsd;matchtype_id;description;";
+				"salami_sw_length;salami_sw_raw;salami_frac_dme;salami_z_scr;salami_rmsd;matchtype_id;description";
 	}
 
 	massert((picture != NULL), "Match picture can not be empty");
@@ -41,19 +41,19 @@ const char * allscores_string(char * picture, IntSequence *sequence_a, IntSequen
 	const char * sequence_a_code = sequence_code(sequence_a->url);
 	const char * sequence_b_code = sequence_code(sequence_b->url);
 
-	int strlen = snprintf(NULL, 0, "[%s];%s;%s;%f;%f;%u;%f;%f;%f;%f;%f;%f;%f;%f;%u;%f;%f;%f;%u;%s", picture,
+	int strlen = snprintf(NULL, 0, "[%s];%s;%s;%f;%f;%u;%f;%f;%f;%f;%f;%f;%f;%f;%u;%u;%f;%f;%f;%u;%s", picture,
 			sequence_a_code, sequence_b_code, salami->tmscore, salami->andrew_scr, matchtype->count, matchtype->score,
 			matchtype->swscore, matchtype->blast, salami->id, salami->sw_score, salami->sw_smpl_score,
-			salami->sw_score_tot, salami->sw_cvr, salami->sw_raw, salami->frac_dme, salami->z_scr, salami->rmsd,
+			salami->sw_score_tot, salami->sw_cvr, salami->sw_length, salami->sw_raw, salami->frac_dme, salami->z_scr, salami->rmsd,
 			matchtype->id, sequence_b->description);
 
 	response = malloc((strlen + 1) * sizeof(*response));
 	massert((response != NULL), "Can not allocate memory for out string");
 
-	snprintf(response, (strlen + 1), "[%s];%s;%s;%f;%f;%u;%f;%f;%f;%f;%f;%f;%f;%f;%u;%f;%f;%f;%u;%s", picture,
+	snprintf(response, (strlen + 1), "[%s];%s;%s;%f;%f;%u;%f;%f;%f;%f;%f;%f;%f;%f;%u;%u;%f;%f;%f;%u;%s", picture,
 			sequence_a_code, sequence_b_code, salami->tmscore, salami->andrew_scr, matchtype->count, matchtype->score,
 			matchtype->swscore, matchtype->blast, salami->id, salami->sw_score, salami->sw_smpl_score,
-			salami->sw_score_tot, salami->sw_cvr, salami->sw_raw, salami->frac_dme, salami->z_scr, salami->rmsd,
+			salami->sw_score_tot, salami->sw_cvr, salami->sw_length, salami->sw_raw, salami->frac_dme, salami->z_scr, salami->rmsd,
 			matchtype->id, sequence_b->description);
 
 	return (const char *) response;

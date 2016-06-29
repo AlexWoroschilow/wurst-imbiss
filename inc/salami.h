@@ -25,6 +25,7 @@ struct salami_info {
 			nw_score, nw_score_tot;
 	double tmscore;
 	int sw_raw, nw_raw;
+	Uint nw_length, sw_length;
 };
 
 struct score_mat;
